@@ -1,0 +1,37 @@
+﻿Analyzing pj_driver...                                          
+
+  error - The getter 'statusUpdate' isn't defined for the type 'L10n' - lib\src\features\notifications\notification_screen.dart:59:85 - undefined_getter
+  error - The getter 'assignment' isn't defined for the type 'L10n' - lib\src\features\notifications\notification_screen.dart:61:83 - undefined_getter
+  error - Undefined name 'l10n' - lib\src\features\profile\profile_screen.dart:465:11 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\profile\profile_screen.dart:468:23 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\profile\profile_screen.dart:484:15 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\profile\profile_screen.dart:519:17 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\profile\profile_screen.dart:528:17 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\profile\profile_screen.dart:538:55 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\profile\profile_screen.dart:546:29 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\profile\profile_screen.dart:589:17 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\profile\profile_screen.dart:604:17 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\profile\profile_screen.dart:619:17 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\profile\profile_screen.dart:638:29 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\settings\settings_screen.dart:348:11 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\settings\settings_screen.dart:351:23 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\settings\settings_screen.dart:367:15 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\settings\settings_screen.dart:413:17 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\settings\settings_screen.dart:422:17 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\settings\settings_screen.dart:432:55 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\settings\settings_screen.dart:440:29 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\settings\settings_screen.dart:494:17 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\settings\settings_screen.dart:509:17 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\settings\settings_screen.dart:524:17 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\settings\settings_screen.dart:543:29 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\settings\settings_screen.dart:695:29 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\settings\settings_screen.dart:697:29 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\settings\settings_screen.dart:699:29 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\settings\settings_screen.dart:699:44 - undefined_identifier
+  error - Undefined name 'l10n' - lib\src\features\settings\settings_screen.dart:768:15 - undefined_identifier
+  error - Undefined name 'context' - lib\src\features\shipments\assigned_shipments_screen.dart:198:50 - undefined_identifier
+  error - Undefined name 'context' - lib\src\features\shipments\assigned_shipments_screen.dart:199:32 - undefined_identifier
+  error - Undefined name 'context' - lib\src\features\shipments\assigned_shipments_screen.dart:200:34 - undefined_identifier
+  error - Undefined name 'context' - lib\src\features\shipments\assigned_shipments_screen.dart:201:33 - undefined_identifier
+  error - Expected to find '}' - lib\src\features\shipments\shipment_action_screen.dart:128:5 - expected_token
+
