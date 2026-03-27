@@ -26,7 +26,9 @@ class UpdateVehicleTypesSeeder extends Seeder
         ]);
 
         // Add new airplane transport method
-        VehicleType::create([
+        VehicleType::updateOrCreate([
+            'name_en' => 'Airplane',
+        ], [
             'name_en' => 'Airplane',
             'name_ku' => 'فڕۆکە',
             'multiplier' => 2.5,
@@ -36,7 +38,9 @@ class UpdateVehicleTypesSeeder extends Seeder
         ]);
 
         // Add additional ground transport options
-        VehicleType::create([
+        VehicleType::updateOrCreate([
+            'name_en' => 'Van',
+        ], [
             'name_en' => 'Van',
             'name_ku' => 'ڤان',
             'multiplier' => 1.1,
