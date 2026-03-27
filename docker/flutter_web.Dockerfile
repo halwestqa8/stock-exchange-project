@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM debian:stable-slim AS build-env
+FROM debian:bullseye-slim AS build-env
 
 # Install dependencies
 RUN apt-get update && \
