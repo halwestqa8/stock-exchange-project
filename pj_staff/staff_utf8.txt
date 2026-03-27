@@ -1,0 +1,71 @@
+﻿Analyzing pj_staff...                                           
+
+  error - Invalid constant value - lib\src\features\auth\login_screen.dart:40:39 - invalid_constant
+  error - The values in a const list literal must be constants - lib\src\features\auth\login_screen.dart:40:39 - non_constant_list_element
+  error - Invalid constant value - lib\src\features\auth\login_screen.dart:41:36 - invalid_constant
+  error - The values in a const list literal must be constants - lib\src\features\auth\login_screen.dart:41:36 - non_constant_list_element
+   info - Unnecessary 'const' keyword - lib\src\features\auth\login_screen.dart:41:68 - unnecessary_const
+  error - The getter 'sendBtn' isn't defined for the type 'L10n' - lib\src\features\notifications\notifications_screen.dart:88:51 - undefined_getter
+  error - Invalid constant value - lib\src\features\notifications\notifications_screen.dart:120:31 - invalid_constant
+  error - The values in a const list literal must be constants - lib\src\features\notifications\notifications_screen.dart:120:31 - non_constant_list_element
+  error - Invalid constant value - lib\src\features\notifications\notifications_screen.dart:121:31 - invalid_constant
+  error - The values in a const list literal must be constants - lib\src\features\notifications\notifications_screen.dart:121:31 - non_constant_list_element
+  error - Invalid constant value - lib\src\features\notifications\notifications_screen.dart:664:29 - invalid_constant
+  error - The getter 'selectCustomer' isn't defined for the type 'L10n' - lib\src\features\notifications\notifications_screen.dart:664:47 - undefined_getter
+   info - Unnecessary 'const' keyword - lib\src\features\notifications\notifications_screen.dart:665:28 - unnecessary_const
+  error - The getter 'selectCustomerError' isn't defined for the type 'L10n' - lib\src\features\notifications\notifications_screen.dart:773:49 - undefined_getter
+  error - The getter 'messageEnRequired' isn't defined for the type 'L10n' - lib\src\features\notifications\notifications_screen.dart:777:49 - undefined_getter
+  error - The getter 'messageKuRequired' isn't defined for the type 'L10n' - lib\src\features\notifications\notifications_screen.dart:781:49 - undefined_getter
+  error - The getter 'failedToSend' isn't defined for the type 'L10n' - lib\src\features\notifications\notifications_screen.dart:814:52 - undefined_getter
+  error - The getter 'locationLabel' isn't defined for the type 'L10n' - lib\src\features\notifications\notifications_screen.dart:964:40 - undefined_getter
+  error - The getter 'locationHint' isn't defined for the type 'L10n' - lib\src\features\notifications\notifications_screen.dart:974:49 - undefined_getter
+  error - Undefined name 'L10n' - lib\src\features\reports\report_management_screen.dart:30:18 - undefined_identifier
+  error - Undefined name 'L10n' - lib\src\features\reports\report_management_screen.dart:32:18 - undefined_identifier
+  error - Undefined name 'L10n' - lib\src\features\reports\report_management_screen.dart:40:26 - undefined_identifier
+  error - Undefined name 'L10n' - lib\src\features\reports\report_management_screen.dart:64:47 - undefined_identifier
+  error - Undefined name 'L10n' - lib\src\features\reports\report_management_screen.dart:64:86 - undefined_identifier
+  error - Undefined name 'L10n' - lib\src\features\reports\report_management_screen.dart:68:37 - undefined_identifier
+  error - Undefined name 'L10n' - lib\src\features\reports\report_management_screen.dart:70:37 - undefined_identifier
+  error - Undefined name 'L10n' - lib\src\features\reports\report_management_screen.dart:73:35 - undefined_identifier
+  error - Undefined name 'L10n' - lib\src\features\reports\report_management_screen.dart:83:34 - undefined_identifier
+  error - Undefined name 'L10n' - lib\src\features\reports\report_management_screen.dart:101:45 - undefined_identifier
+  error - Undefined name 'L10n' - lib\src\features\reports\report_management_screen.dart:110:45 - undefined_identifier
+  error - Undefined name 'L10n' - lib\src\features\reports\report_management_screen.dart:119:54 - undefined_identifier
+  error - The getter 'minPasswordHint' isn't defined for the type 'L10n' - lib\src\features\settings\settings_screen.dart:393:91 - undefined_getter
+  error - The getter 'updateBtn' isn't defined for the type 'L10n' - lib\src\features\settings\settings_screen.dart:409:43 - undefined_getter
+warning - The value of the local variable 'user' isn't used - lib\src\features\shell\staff_sidebar.dart:14:11 - unused_local_variable
+  error - Too many positional arguments: 0 expected, but 2 found - lib\src\features\shell\staff_sidebar.dart:34:1 - extra_positional_arguments_could_be_named
+  error - Undefined name 'import' - lib\src\features\shell\staff_sidebar.dart:34:1 - undefined_identifier
+  error - Expected to find ',' - lib\src\features\shell\staff_sidebar.dart:34:8 - expected_token
+  error - Expected to find ')' - lib\src\features\shell\staff_sidebar.dart:34:38 - expected_token
+  error - Expected to find ']' - lib\src\features\shell\staff_sidebar.dart:34:38 - expected_token
+warning - Dead code - lib\src\features\shell\staff_sidebar.dart:36:1 - dead_code
+  error - 'class' can't be used as an identifier because it's a keyword - lib\src\features\shell\staff_sidebar.dart:36:1 - expected_identifier_but_got_keyword
+  error - Expected a statement - lib\src\features\shell\staff_sidebar.dart:36:1 - missing_statement
+  error - Expected to find ';' - lib\src\features\shell\staff_sidebar.dart:36:1 - expected_token
+  error - Undefined name 'class' - lib\src\features\shell\staff_sidebar.dart:36:1 - undefined_identifier
+  error - Expected to find ';' - lib\src\features\shell\staff_sidebar.dart:36:7 - expected_token
+  error - 'extends' can't be used as an identifier because it's a keyword - lib\src\features\shell\staff_sidebar.dart:36:20 - expected_identifier_but_got_keyword
+  error - Expected a statement - lib\src\features\shell\staff_sidebar.dart:36:20 - missing_statement
+  error - Expected to find ';' - lib\src\features\shell\staff_sidebar.dart:36:20 - expected_token
+  error - Undefined name 'extends' - lib\src\features\shell\staff_sidebar.dart:36:20 - undefined_identifier
+  error - Expected to find ';' - lib\src\features\shell\staff_sidebar.dart:36:28 - expected_token
+  error - The named parameter 'activeRoute' is required, but there's no corresponding argument - lib\src\features\shell\staff_sidebar.dart:38:9 - missing_required_argument
+  error - Too many positional arguments: 0 expected, but 1 found - lib\src\features\shell\staff_sidebar.dart:38:22 - extra_positional_arguments_could_be_named
+  error - Invalid constant value - lib\src\features\shell\staff_sidebar.dart:38:23 - invalid_constant
+   info - 'required' is deprecated and shouldn't be used. In Dart 2.12 and later, use the built-in `required` keyword to mark a named parameter as required - lib\src\features\shell\staff_sidebar.dart:38:34 - deprecated_member_use
+  error - Expected to find ',' - lib\src\features\shell\staff_sidebar.dart:38:43 - expected_token
+warning - The declaration 'build' isn't referenced - lib\src\features\shell\staff_sidebar.dart:41:10 - unused_element
+  error - Local variable '_navItem' can't be referenced before it is declared - lib\src\features\shell\staff_sidebar.dart:82:11 - referenced_before_declaration
+  error - The final variable 'activeRoute' can't be read because it's potentially unassigned at this point - lib\src\features\shell\staff_sidebar.dart:82:64 - read_potentially_unassigned_final
+  error - Local variable '_navItem' can't be referenced before it is declared - lib\src\features\shell\staff_sidebar.dart:84:11 - referenced_before_declaration
+  error - The final variable 'activeRoute' can't be read because it's potentially unassigned at this point - lib\src\features\shell\staff_sidebar.dart:84:62 - read_potentially_unassigned_final
+  error - Local variable '_navItem' can't be referenced before it is declared - lib\src\features\shell\staff_sidebar.dart:86:11 - referenced_before_declaration
+  error - The final variable 'activeRoute' can't be read because it's potentially unassigned at this point - lib\src\features\shell\staff_sidebar.dart:90:13 - read_potentially_unassigned_final
+  error - Local variable '_navItem' can't be referenced before it is declared - lib\src\features\shell\staff_sidebar.dart:93:11 - referenced_before_declaration
+  error - The final variable 'activeRoute' can't be read because it's potentially unassigned at this point - lib\src\features\shell\staff_sidebar.dart:93:63 - read_potentially_unassigned_final
+  error - Local variable '_confirmLogout' can't be referenced before it is declared - lib\src\features\shell\staff_sidebar.dart:154:34 - referenced_before_declaration
+   info - The local variable '_navItem' starts with an underscore - lib\src\features\shell\staff_sidebar.dart:179:10 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_confirmLogout' starts with an underscore - lib\src\features\shell\staff_sidebar.dart:225:8 - no_leading_underscores_for_local_identifiers
+  error - Expected to find '}' - lib\src\features\shell\staff_sidebar.dart:258:1 - expected_token
+
