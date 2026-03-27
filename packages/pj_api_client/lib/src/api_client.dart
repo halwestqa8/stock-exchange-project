@@ -7,7 +7,14 @@ class ApiClient {
   final SanctumInterceptor _interceptor = SanctumInterceptor();
 
   ApiClient({required String baseUrl}) {
-    _dio = Dio(BaseOptions(baseUrl: baseUrl));
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: baseUrl,
+        headers: const {'Accept': 'application/json'},
+        contentType: Headers.jsonContentType,
+        responseType: ResponseType.json,
+      ),
+    );
     _dio.interceptors.add(_interceptor);
     _dio.interceptors.add(
       LogInterceptor(responseBody: true, requestBody: true),

@@ -28,10 +28,10 @@ class ShipmentNotifier extends StateNotifier<AsyncValue<void>> {
       await _client.createShipment({
         'origin': origin,
         'destination': destination,
-        'weight_kg': ?weight,
-        'size': ?size,
         'category_id': categoryId,
         'vehicle_type_id': vehicleTypeId,
+        ...?(weight == null ? null : {'weight_kg': weight}),
+        ...?(size == null ? null : {'size': size}),
       });
       state = const AsyncData(null);
     } catch (e, s) {
@@ -40,6 +40,7 @@ class ShipmentNotifier extends StateNotifier<AsyncValue<void>> {
   }
 }
 
-final shipmentNotifierProvider = StateNotifierProvider<ShipmentNotifier, AsyncValue<void>>((ref) {
-  return ShipmentNotifier(ref.watch(apiClientProvider));
-});
+final shipmentNotifierProvider =
+    StateNotifierProvider<ShipmentNotifier, AsyncValue<void>>((ref) {
+      return ShipmentNotifier(ref.watch(apiClientProvider));
+    });
