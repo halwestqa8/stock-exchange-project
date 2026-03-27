@@ -1,0 +1,17 @@
+.git
+.gitignore
+.antigravity
+.gemini
+**/.dart_tool
+**/build
+**/node_modules
+**/.packages
+**/pubspec.lock
+**/ios
+**/android
+**/windows
+**/macos
+**/linux
+pj_backend/vendor
+pj_backend/storage/*.log
+pj_backend/.env
