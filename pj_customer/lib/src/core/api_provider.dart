@@ -5,13 +5,17 @@ import 'package:pj_api_client/pj_api_client.dart';
 final String _defaultBaseUrl = kIsWeb
     ? 'http://localhost:8000'
     : (defaultTargetPlatform == TargetPlatform.android
-        ? 'http://10.0.2.2:8000'
-        : 'http://localhost:8000');
+          ? 'http://10.0.2.2:8000'
+          : 'http://localhost:8000');
 
-final String apiBaseUrl = String.fromEnvironment(
+const String _configuredBaseUrl = String.fromEnvironment(
   'BASE_URL',
-  defaultValue: _defaultBaseUrl,
+  defaultValue: '',
 );
+
+final String apiBaseUrl = _configuredBaseUrl.isNotEmpty
+    ? _configuredBaseUrl
+    : _defaultBaseUrl;
 
 String resolveApiUrl(String path) {
   if (path.startsWith('http://') || path.startsWith('https://')) {

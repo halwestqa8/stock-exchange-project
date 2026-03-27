@@ -10,6 +10,7 @@ Route::prefix('v1')->group(function () {
     // Public routes
     Route::post('/auth/register', [AuthController::class, 'register']);
     Route::post('/auth/login', [AuthController::class, 'login']);
+    Route::get('/faqs', [\App\Http\Controllers\AdminController::class, 'faqs']);
 
     // Protected routes
     Route::middleware('auth:sanctum')->group(function () {
@@ -41,9 +42,6 @@ Route::prefix('v1')->group(function () {
         Route::get('/staff/notifications/sent', [\App\Http\Controllers\NotificationController::class, 'sent']);
         Route::get('/staff/customers', [\App\Http\Controllers\NotificationController::class, 'customers']);
         Route::get('/staff/drivers', [ShipmentController::class, 'drivers']);
-
-        // Public FAQs
-        Route::get('/faqs', [\App\Http\Controllers\AdminController::class, 'faqs']);
 
         // Admin Routes
         Route::middleware('role:super_admin')->group(function () {
