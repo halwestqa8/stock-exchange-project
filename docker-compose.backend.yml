@@ -1,0 +1,32 @@
+services:
+  database:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-transportation_management_system}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  api:
+    build:
+      context: .
+      dockerfile: pj_backend/Dockerfile
+    environment:
+      - DB_HOST=database
+      - DB_DATABASE=${DB_DATABASE:-transportation_management_system}
+      - DB_USERNAME=${DB_USERNAME:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+    depends_on:
+      - database
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  pgdata:
