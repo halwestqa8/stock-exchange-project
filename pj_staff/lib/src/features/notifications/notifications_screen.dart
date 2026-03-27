@@ -258,7 +258,7 @@ class _SentCard extends StatelessWidget {
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(17)),
               child: Image.network(
-                'http://localhost:8000$imageUrl',
+                resolveApiUrl(imageUrl),
                 height: 160,
                 width: double.infinity,
                 fit: BoxFit.cover,

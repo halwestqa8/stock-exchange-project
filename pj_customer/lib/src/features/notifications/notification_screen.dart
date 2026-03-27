@@ -195,9 +195,7 @@ class _NotificationCard extends StatelessWidget {
                   borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(17)),
                   child: Image.network(
-                    n.imageUrl!.startsWith('http')
-                        ? n.imageUrl!
-                        : 'http://localhost:8000${n.imageUrl}',
+                    resolveApiUrl(n.imageUrl!),
                     height: 180,
                     width: double.infinity,
                     fit: BoxFit.cover,
