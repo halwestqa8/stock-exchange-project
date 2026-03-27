@@ -45,7 +45,8 @@
 # ===========================
 # PHP / Laravel / Composer
 # ===========================
-pj_backend/vendor/
+# vendor/ is intentionally TRACKED so the VPS Docker build can copy it
+# directly, avoiding composer install on low-RAM servers.
 pj_backend/.env
 pj_backend/storage/logs/*.log
 pj_backend/storage/framework/cache/
