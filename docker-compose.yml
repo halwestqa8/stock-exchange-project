@@ -12,8 +12,8 @@ services:
 
   api:
     build:
-      context: .
-      dockerfile: pj_backend/Dockerfile
+      context: pj_backend
+      dockerfile: Dockerfile
     environment:
       - DB_HOST=database
       - DB_DATABASE=${DB_DATABASE:-transportation_management_system}
