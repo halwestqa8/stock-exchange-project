@@ -1,0 +1,7 @@
+﻿Analyzing pj_staff...                                           
+
+  error - Invalid constant value - lib\src\features\notifications\notifications_screen.dart:664:29 - invalid_constant
+   info - Unnecessary 'const' keyword - lib\src\features\notifications\notifications_screen.dart:665:28 - unnecessary_const
+  error - The getter 'reportLabel' isn't defined for the type 'L10n' - lib\src\features\reports\report_management_screen.dart:69:55 - undefined_getter
+  error - The getter 'customerLabel' isn't defined for the type 'L10n' - lib\src\features\reports\report_management_screen.dart:74:53 - undefined_getter
+
