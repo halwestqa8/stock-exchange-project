@@ -10,13 +10,14 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     libpq-dev \
+    libzip-dev \
     nginx
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd
+RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd zip
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -28,7 +29,7 @@ WORKDIR /var/www
 COPY . /var/www
 
 # Install composer dependencies
-RUN composer install --no-interaction --optimize-autoloader --no-dev
+RUN COMPOSER_ALLOW_SUPERUSER=1 COMPOSER_MEMORY_LIMIT=-1 composer install --no-interaction --optimize-autoloader --no-dev
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
