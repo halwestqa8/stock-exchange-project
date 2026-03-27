@@ -1,0 +1,18 @@
+﻿Analyzing pj_driver...                                          
+
+  error - The getter 'statusUpdate' isn't defined for the type 'L10n' - lib\src\features\notifications\notification_screen.dart:59:85 - undefined_getter
+  error - The getter 'assignment' isn't defined for the type 'L10n' - lib\src\features\notifications\notification_screen.dart:61:83 - undefined_getter
+warning - Unused import: 'package:pj_domain/pj_domain.dart' - lib\src\features\profile\profile_screen.dart:4:8 - unused_import
+  error - Target of URI doesn't exist: 'shipment_stats_widget.dart' - lib\src\features\profile\profile_screen.dart:10:8 - uri_does_not_exist
+  error - The method 'ShipmentStatsWidget' isn't defined for the type 'ProfileScreen' - lib\src\features\profile\profile_screen.dart:117:33 - undefined_method
+   info - Unnecessary use of multiple underscores - lib\src\features\profile\profile_screen.dart:119:28 - unnecessary_underscores
+  error - The getter 'indigo' isn't defined for the type 'AppTheme' - lib\src\features\profile\profile_screen.dart:149:33 - undefined_getter
+  error - The getter 'indigo' isn't defined for the type 'AppTheme' - lib\src\features\profile\profile_screen.dart:313:71 - undefined_getter
+  error - The getter 'updateBtn' isn't defined for the type 'L10n' - lib\src\features\profile\profile_screen.dart:314:30 - undefined_getter
+warning - Duplicate import - lib\src\features\settings\settings_screen.dart:7:8 - duplicate_import
+  error - The getter 'settings' isn't defined for the type 'L10n' - lib\src\features\settings\settings_screen.dart:28:25 - undefined_getter
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\src\features\settings\settings_screen.dart:135:19 - deprecated_member_use
+  error - The getter 'indigo' isn't defined for the type 'AppTheme' - lib\src\features\settings\settings_screen.dart:333:71 - undefined_getter
+  error - The getter 'updateBtn' isn't defined for the type 'L10n' - lib\src\features\settings\settings_screen.dart:334:30 - undefined_getter
+  error - The getter 'settings' isn't defined for the type 'L10n' - lib\src\features\shell\main_shell.dart:64:27 - undefined_getter
+
