@@ -1,9 +1,12 @@
 # Stage 1: Build
-FROM debian:latest AS build-env
+FROM debian:stable-slim AS build-env
 
 # Install dependencies
-RUN apt-get update && apt-get install -y curl git wget unzip libgconf-2-4 gdb libstdc++6 libglu1-mesa fonts-droid-fallback lib32stdc++6 python3
-RUN apt-get clean
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    curl git wget unzip libgconf-2-4 gdb libstdc++6 libglu1-mesa lib32stdc++6 python3 ca-certificates && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Clone Flutter
 RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter
