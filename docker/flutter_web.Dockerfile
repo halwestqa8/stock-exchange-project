@@ -12,8 +12,10 @@ RUN apt-get update && \
 
 # Download the pinned SDK bundle directly instead of cloning the whole repo.
 RUN curl -fsSL "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz" -o /tmp/flutter.tar.xz && \
-    tar -xJf /tmp/flutter.tar.xz -C /usr/local && \
-    rm /tmp/flutter.tar.xz
+    tar --no-same-owner -xJf /tmp/flutter.tar.xz -C /usr/local && \
+    rm /tmp/flutter.tar.xz && \
+    chown -R root:root /usr/local/flutter && \
+    git config --global --add safe.directory /usr/local/flutter
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
 # Web support is available in current stable Flutter builds without an extra
