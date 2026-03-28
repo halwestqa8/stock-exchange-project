@@ -1,6 +1,8 @@
 # Stage 1: Build
 FROM debian:bullseye-slim AS build-env
 
+ARG FLUTTER_VERSION=3.41.2
+
 # Install dependencies
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -8,8 +10,8 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Clone Flutter
-RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter
+# Pin Flutter to a known stable release so Docker builds stay reproducible.
+RUN git clone --depth 1 --branch ${FLUTTER_VERSION} https://github.com/flutter/flutter.git /usr/local/flutter
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
 # Enable web
