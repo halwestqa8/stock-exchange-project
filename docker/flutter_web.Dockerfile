@@ -16,8 +16,9 @@ RUN curl -fsSL "https://storage.googleapis.com/flutter_infra_release/releases/st
     rm /tmp/flutter.tar.xz
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
-# Enable web
-RUN flutter config --enable-web && flutter precache --web
+# Web support is available in current stable Flutter builds without an extra
+# enable step, and the archived SDK can fail if we force a config write here.
+RUN flutter --version
 
 # Copy the whole monorepo to build with local packages
 WORKDIR /app
