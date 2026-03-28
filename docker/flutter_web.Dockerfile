@@ -6,16 +6,18 @@ ARG FLUTTER_VERSION=3.41.2
 # Install dependencies
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    curl git wget unzip libgconf-2-4 gdb libstdc++6 libglu1-mesa lib32stdc++6 python3 ca-certificates && \
+    curl git unzip xz-utils zip libglu1-mesa ca-certificates && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Pin Flutter to a known stable release so Docker builds stay reproducible.
-RUN git clone --depth 1 --branch ${FLUTTER_VERSION} https://github.com/flutter/flutter.git /usr/local/flutter
+# Download the pinned SDK bundle directly instead of cloning the whole repo.
+RUN curl -fsSL "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz" -o /tmp/flutter.tar.xz && \
+    tar -xJf /tmp/flutter.tar.xz -C /usr/local && \
+    rm /tmp/flutter.tar.xz
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
 # Enable web
-RUN flutter config --enable-web
+RUN flutter config --enable-web && flutter precache --web
 
 # Copy the whole monorepo to build with local packages
 WORKDIR /app
