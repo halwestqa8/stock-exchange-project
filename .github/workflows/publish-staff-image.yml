@@ -64,7 +64,7 @@ jobs:
       - name: Build and push runtime image
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./pj_staff/build/web
           file: docker/staff.runtime.Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
