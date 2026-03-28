@@ -6,7 +6,6 @@
 **/build
 **/node_modules
 **/.packages
-**/pubspec.lock
 **/ios
 **/android
 **/windows

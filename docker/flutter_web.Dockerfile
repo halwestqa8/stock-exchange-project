@@ -20,9 +20,13 @@ ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PAT
 # enable step, and the archived SDK can fail if we force a config write here.
 RUN flutter --version
 
-# Copy the whole monorepo to build with local packages
+# Copy only the frontend apps and shared packages needed for Flutter web builds.
 WORKDIR /app
-COPY . .
+COPY packages ./packages
+COPY pj_admin ./pj_admin
+COPY pj_customer ./pj_customer
+COPY pj_driver ./pj_driver
+COPY pj_staff ./pj_staff
 
 # Argument for the specific app to build
 ARG APP_DIR
