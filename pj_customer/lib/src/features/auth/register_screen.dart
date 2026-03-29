@@ -1,4 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'dart:io';
+
+import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -74,12 +76,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
     );
 
     // â”€â”€ Pulse â”€â”€
-    _pulse1Scale = Tween<double>(begin: 0.80, end: 1.20).animate(
-      CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut),
-    );
-    _pulse1Opacity = Tween<double>(begin: 0.35, end: 0.85).animate(
-      CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut),
-    );
+    _pulse1Scale = Tween<double>(
+      begin: 0.80,
+      end: 1.20,
+    ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
+    _pulse1Opacity = Tween<double>(
+      begin: 0.35,
+      end: 0.85,
+    ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
     _pulse2Opacity = Tween<double>(begin: 0.20, end: 0.60).animate(
       CurvedAnimation(
         parent: _pulseCtrl,
@@ -88,13 +92,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
     );
 
     // â”€â”€ Back button slides from left â”€â”€
-    _backSlide = Tween<Offset>(
-      begin: const Offset(-1.0, 0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _entranceCtrl,
-      curve: const Interval(0.00, 0.30, curve: Curves.easeOutCubic),
-    ));
+    _backSlide = Tween<Offset>(begin: const Offset(-1.0, 0), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _entranceCtrl,
+            curve: const Interval(0.00, 0.30, curve: Curves.easeOutCubic),
+          ),
+        );
     _backOpacity = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _entranceCtrl,
@@ -103,13 +107,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
     );
 
     // â”€â”€ Title block â”€â”€
-    _titleSlide = Tween<Offset>(
-      begin: const Offset(0, 0.5),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _entranceCtrl,
-      curve: const Interval(0.10, 0.42, curve: Curves.easeOutCubic),
-    ));
+    _titleSlide = Tween<Offset>(begin: const Offset(0, 0.5), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _entranceCtrl,
+            curve: const Interval(0.10, 0.42, curve: Curves.easeOutCubic),
+          ),
+        );
     _titleOpacity = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _entranceCtrl,
@@ -124,10 +128,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
       return Tween<Offset>(
         begin: const Offset(0, 0.55),
         end: Offset.zero,
-      ).animate(CurvedAnimation(
-        parent: _entranceCtrl,
-        curve: Interval(start, end, curve: Curves.easeOutCubic),
-      ));
+      ).animate(
+        CurvedAnimation(
+          parent: _entranceCtrl,
+          curve: Interval(start, end, curve: Curves.easeOutCubic),
+        ),
+      );
     });
     _fieldOpacities = List.generate(4, (i) {
       final start = 0.28 + i * 0.09;
@@ -141,9 +147,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
     });
 
     // â”€â”€ Button press scale â”€â”€
-    _btnScale = Tween<double>(begin: 1.0, end: 0.96).animate(
-      CurvedAnimation(parent: _buttonCtrl, curve: Curves.easeInOut),
-    );
+    _btnScale = Tween<double>(
+      begin: 1.0,
+      end: 0.96,
+    ).animate(CurvedAnimation(parent: _buttonCtrl, curve: Curves.easeInOut));
 
     // â”€â”€ Footer (terms + sign-in link) â”€â”€
     _footerOpacity = Tween<double>(begin: 0, end: 1).animate(
@@ -174,12 +181,46 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
       animation: _entranceCtrl,
       builder: (_, _) => SlideTransition(
         position: _fieldSlides[index],
-        child: FadeTransition(
-          opacity: _fieldOpacities[index],
-          child: child,
-        ),
+        child: FadeTransition(opacity: _fieldOpacities[index], child: child),
       ),
     );
+  }
+
+  String _extractDioMessage(DioException error, String fallback) {
+    if (error.type == DioExceptionType.connectionError ||
+        error.type == DioExceptionType.connectionTimeout ||
+        error.type == DioExceptionType.sendTimeout ||
+        error.type == DioExceptionType.receiveTimeout ||
+        error.error is SocketException) {
+      return fallback;
+    }
+
+    final data = error.response?.data;
+    if (data is Map) {
+      final errors = data['errors'];
+      if (errors is Map) {
+        for (final value in errors.values) {
+          if (value is List && value.isNotEmpty && value.first is String) {
+            return value.first as String;
+          }
+          if (value is String && value.isNotEmpty) {
+            return value;
+          }
+        }
+      }
+
+      final message = data['message'];
+      if (message is String && message.isNotEmpty) {
+        return message;
+      }
+    }
+
+    final message = error.message;
+    if (message != null && message.isNotEmpty) {
+      return message;
+    }
+
+    return fallback;
   }
 
   @override
@@ -200,7 +241,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
             children: [
               // â”€â”€ Primary pulsing glow (top-right) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
               Positioned(
-                top: 50, right: -60,
+                top: 50,
+                right: -60,
                 child: AnimatedBuilder(
                   animation: _pulseCtrl,
                   builder: (_, _) => Transform.scale(
@@ -208,7 +250,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                     child: Opacity(
                       opacity: _pulse1Opacity.value,
                       child: Container(
-                        width: 280, height: 280,
+                        width: 280,
+                        height: 280,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: RadialGradient(
@@ -228,13 +271,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
 
               // â”€â”€ Secondary accent glow (bottom-left) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
               Positioned(
-                bottom: 60, left: -50,
+                bottom: 60,
+                left: -50,
                 child: AnimatedBuilder(
                   animation: _pulseCtrl,
                   builder: (_, _) => Opacity(
                     opacity: _pulse2Opacity.value,
                     child: Container(
-                      width: 220, height: 220,
+                      width: 220,
+                      height: 220,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
@@ -251,13 +296,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
 
               // â”€â”€ Tertiary tiny glow (mid-right) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
               Positioned(
-                top: 320, right: -20,
+                top: 320,
+                right: -20,
                 child: AnimatedBuilder(
                   animation: _pulseCtrl,
                   builder: (_, _) => Opacity(
                     opacity: (1.0 - (_pulse1Opacity.value - 0.35)) * 0.35,
                     child: Container(
-                      width: 120, height: 120,
+                      width: 120,
+                      height: 120,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
@@ -366,8 +413,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                               icon: Icons.person_outline_rounded,
                               validator: (val) =>
                                   (val == null || val.trim().isEmpty)
-                                      ? L10n.of(context)!.enterName
-                                      : null,
+                                  ? L10n.of(context)!.enterName
+                                  : null,
                             ),
                           ],
                         ),
@@ -395,7 +442,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                                   return L10n.of(context)!.enterEmail;
                                 }
                                 final emailRegex = RegExp(
-                                    r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,}$');
+                                  r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,}$',
+                                );
                                 if (!emailRegex.hasMatch(val)) {
                                   return L10n.of(context)!.enterValidEmail;
                                 }
@@ -427,8 +475,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                                   setState(() => _obscurePass = !_obscurePass),
                               validator: (val) =>
                                   (val == null || val.length < 8)
-                                      ? L10n.of(context)!.passwordMin8
-                                      : null,
+                                  ? L10n.of(context)!.passwordMin8
+                                  : null,
                             ),
                           ],
                         ),
@@ -452,11 +500,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                               icon: Icons.lock_outline_rounded,
                               obscure: _obscureConfirm,
                               onToggleObscure: () => setState(
-                                  () => _obscureConfirm = !_obscureConfirm),
-                              validator: (val) =>
-                                  (val != _passCtrl.text)
-                                      ? L10n.of(context)!.passwordMismatch
-                                      : null,
+                                () => _obscureConfirm = !_obscureConfirm,
+                              ),
+                              validator: (val) => (val != _passCtrl.text)
+                                  ? L10n.of(context)!.passwordMismatch
+                                  : null,
                             ),
                           ],
                         ),
@@ -465,8 +513,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
 
                       // â”€â”€ Create Account button â”€â”€
                       AnimatedBuilder(
-                        animation: Listenable.merge(
-                            [_entranceCtrl, _buttonCtrl]),
+                        animation: Listenable.merge([
+                          _entranceCtrl,
+                          _buttonCtrl,
+                        ]),
                         builder: (_, child) => FadeTransition(
                           opacity: _footerOpacity,
                           child: Transform.scale(
@@ -577,32 +627,48 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
     try {
-      await ref.read(authProvider.notifier).register(
+      await ref
+          .read(authProvider.notifier)
+          .register(
             _nameCtrl.text.trim(),
             _emailCtrl.text.trim(),
             _passCtrl.text,
             _confirmCtrl.text,
           );
-      if (mounted) context.go('/');
-    } catch (e) {
-      if (mounted) {
-        String msg = L10n.of(context)!.registrationFailed;
-        if (e is DioException && e.response?.data?['message'] != null) {
-          msg = e.response!.data['message'];
-        }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(msg),
-            backgroundColor: AppTheme.red,
-            behavior: SnackBarBehavior.floating,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    } on DioException catch (e) {
+      if (!mounted) return;
+      final msg = _extractDioMessage(e, L10n.of(context)!.registrationFailed);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(msg),
+          backgroundColor: AppTheme.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-        );
-      }
+        ),
+      );
+      return;
+    } catch (e) {
+      if (!mounted) return;
+      final msg = '${L10n.of(context)!.registrationFailed}: $e';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(msg),
+          backgroundColor: AppTheme.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+      return;
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+
+    if (!mounted) return;
+    context.go('/');
   }
 }
 
@@ -717,9 +783,10 @@ class _CircleIconButtonState extends State<_CircleIconButton>
       duration: const Duration(milliseconds: 100),
       reverseDuration: const Duration(milliseconds: 180),
     );
-    _scale = Tween<double>(begin: 1.0, end: 0.88).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
-    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 0.88,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -755,4 +822,3 @@ class _CircleIconButtonState extends State<_CircleIconButton>
     );
   }
 }
-

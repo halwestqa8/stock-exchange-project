@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -77,21 +79,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     );
 
     // ── Pulse ──
-    _pulseScale = Tween<double>(begin: 0.80, end: 1.20).animate(
-      CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut),
-    );
-    _pulseOpacity = Tween<double>(begin: 0.40, end: 0.90).animate(
-      CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut),
-    );
+    _pulseScale = Tween<double>(
+      begin: 0.80,
+      end: 1.20,
+    ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
+    _pulseOpacity = Tween<double>(
+      begin: 0.40,
+      end: 0.90,
+    ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
 
     // ── Back button slides in from left ──
-    _backSlide = Tween<Offset>(
-      begin: const Offset(-1.0, 0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _entranceCtrl,
-      curve: const Interval(0.00, 0.35, curve: Curves.easeOutCubic),
-    ));
+    _backSlide = Tween<Offset>(begin: const Offset(-1.0, 0), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _entranceCtrl,
+            curve: const Interval(0.00, 0.35, curve: Curves.easeOutCubic),
+          ),
+        );
     _backOpacity = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _entranceCtrl,
@@ -114,13 +118,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     );
 
     // ── Title ──
-    _titleSlide = Tween<Offset>(
-      begin: const Offset(0, 0.5),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _entranceCtrl,
-      curve: const Interval(0.20, 0.55, curve: Curves.easeOutCubic),
-    ));
+    _titleSlide = Tween<Offset>(begin: const Offset(0, 0.5), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _entranceCtrl,
+            curve: const Interval(0.20, 0.55, curve: Curves.easeOutCubic),
+          ),
+        );
     _titleOpacity = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _entranceCtrl,
@@ -135,10 +139,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       return Tween<Offset>(
         begin: const Offset(0, 0.55),
         end: Offset.zero,
-      ).animate(CurvedAnimation(
-        parent: _entranceCtrl,
-        curve: Interval(start, end, curve: Curves.easeOutCubic),
-      ));
+      ).animate(
+        CurvedAnimation(
+          parent: _entranceCtrl,
+          curve: Interval(start, end, curve: Curves.easeOutCubic),
+        ),
+      );
     });
     _fieldOpacities = List.generate(3, (i) {
       final start = 0.35 + i * 0.10;
@@ -152,9 +158,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     });
 
     // ── Button ──
-    _btnScale = Tween<double>(begin: 1.0, end: 0.96).animate(
-      CurvedAnimation(parent: _buttonCtrl, curve: Curves.easeInOut),
-    );
+    _btnScale = Tween<double>(
+      begin: 1.0,
+      end: 0.96,
+    ).animate(CurvedAnimation(parent: _buttonCtrl, curve: Curves.easeInOut));
     _btnOpacity = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _entranceCtrl,
@@ -198,6 +205,43 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     );
   }
 
+  String _extractDioMessage(DioException error, String fallback) {
+    if (error.type == DioExceptionType.connectionError ||
+        error.type == DioExceptionType.connectionTimeout ||
+        error.type == DioExceptionType.sendTimeout ||
+        error.type == DioExceptionType.receiveTimeout ||
+        error.error is SocketException) {
+      return fallback;
+    }
+
+    final data = error.response?.data;
+    if (data is Map) {
+      final errors = data['errors'];
+      if (errors is Map) {
+        for (final value in errors.values) {
+          if (value is List && value.isNotEmpty && value.first is String) {
+            return value.first as String;
+          }
+          if (value is String && value.isNotEmpty) {
+            return value;
+          }
+        }
+      }
+
+      final message = data['message'];
+      if (message is String && message.isNotEmpty) {
+        return message;
+      }
+    }
+
+    final message = error.message;
+    if (message != null && message.isNotEmpty) {
+      return message;
+    }
+
+    return fallback;
+  }
+
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
@@ -216,7 +260,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             children: [
               // ── Pulsing background glow ──────────────────────────────────
               Positioned(
-                top: 30, left: 0, right: 0,
+                top: 30,
+                left: 0,
+                right: 0,
                 child: Center(
                   child: AnimatedBuilder(
                     animation: _pulseCtrl,
@@ -225,7 +271,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                       child: Opacity(
                         opacity: _pulseOpacity.value,
                         child: Container(
-                          width: 320, height: 320,
+                          width: 320,
+                          height: 320,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             gradient: RadialGradient(
@@ -246,13 +293,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
               // ── Secondary accent glow (bottom-left) ──────────────────────
               Positioned(
-                bottom: 60, left: -50,
+                bottom: 60,
+                left: -50,
                 child: AnimatedBuilder(
                   animation: _pulseCtrl,
                   builder: (_, _) => Opacity(
                     opacity: (1.0 - (_pulseOpacity.value - 0.4)) * 0.45,
                     child: Container(
-                      width: 200, height: 200,
+                      width: 200,
+                      height: 200,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
@@ -309,7 +358,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         ),
                         child: Center(
                           child: Container(
-                            width: 76, height: 76,
+                            width: 76,
+                            height: 76,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
@@ -324,7 +374,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                               ),
                             ),
                             child: const Center(
-                              child: Text('\u{1F30D}', style: TextStyle(fontSize: 36)), // Earth 🌍
+                              child: Text(
+                                '\u{1F30D}',
+                                style: TextStyle(fontSize: 36),
+                              ), // Earth 🌍
                             ),
                           ),
                         ),
@@ -352,7 +405,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                   height: 1.15,
                                 ),
                                 children: [
-                                  TextSpan(text: L10n.of(context)!.welcomeBackTitle),
+                                  TextSpan(
+                                    text: L10n.of(context)!.welcomeBackTitle,
+                                  ),
                                 ],
                               ),
                             ),
@@ -380,8 +435,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           children: [
                             Text(
                               L10n.of(context)!.email.toUpperCase(),
-                              style: tt.labelLarge
-                                  ?.copyWith(color: Colors.white.withAlpha(140)),
+                              style: tt.labelLarge?.copyWith(
+                                color: Colors.white.withAlpha(140),
+                              ),
                             ),
                             const SizedBox(height: 6),
                             _DarkTextField(
@@ -394,7 +450,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                   return L10n.of(context)!.enterEmail;
                                 }
                                 final emailRegex = RegExp(
-                                    r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,}$');
+                                  r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,}$',
+                                );
                                 if (!emailRegex.hasMatch(val)) {
                                   return L10n.of(context)!.enterValidEmail;
                                 }
@@ -414,8 +471,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           children: [
                             Text(
                               L10n.of(context)!.password.toUpperCase(),
-                              style: tt.labelLarge
-                                  ?.copyWith(color: Colors.white.withAlpha(140)),
+                              style: tt.labelLarge?.copyWith(
+                                color: Colors.white.withAlpha(140),
+                              ),
                             ),
                             const SizedBox(height: 6),
                             _DarkTextField(
@@ -425,10 +483,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                               obscure: _obscure,
                               onToggleObscure: () =>
                                   setState(() => _obscure = !_obscure),
-                              validator: (val) =>
-                                  (val == null || val.isEmpty)
-                                      ? L10n.of(context)!.enterPassword
-                                      : null,
+                              validator: (val) => (val == null || val.isEmpty)
+                                  ? L10n.of(context)!.enterPassword
+                                  : null,
                             ),
                           ],
                         ),
@@ -454,8 +511,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
                       // ── Sign In button ──
                       AnimatedBuilder(
-                        animation: Listenable.merge(
-                            [_entranceCtrl, _buttonCtrl]),
+                        animation: Listenable.merge([
+                          _entranceCtrl,
+                          _buttonCtrl,
+                        ]),
                         builder: (_, child) => FadeTransition(
                           opacity: _btnOpacity,
                           child: Transform.scale(
@@ -520,7 +579,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                   color: Colors.white.withAlpha(100),
                                 ),
                                 children: [
-                                  TextSpan(text: L10n.of(context)!.dontHaveAccount),
+                                  TextSpan(
+                                    text: L10n.of(context)!.dontHaveAccount,
+                                  ),
                                   TextSpan(
                                     text: L10n.of(context)!.createOne,
                                     style: const TextStyle(
@@ -548,46 +609,52 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
-    final l10n = L10n.of(context)!;
     setState(() => _isLoading = true);
     try {
       await ref
           .read(authProvider.notifier)
           .login(_emailCtrl.text.trim(), _passCtrl.text);
-      if (context.mounted) context.go('/');
     } on DioException catch (e) {
-      String msg = l10n.loginFailed;
+      if (!mounted) return;
+      final l10n = L10n.of(context)!;
+      var msg = _extractDioMessage(e, l10n.loginFailed);
       if (e.response?.statusCode == 403) {
-        msg = e.response?.data['message'] ?? l10n.accountDisabled;
-      } else if (e.response?.statusCode == 401 || e.response?.statusCode == 422) {
-        msg = e.response?.data['message'] ?? l10n.incorrectCredentials;
+        msg = _extractDioMessage(e, l10n.accountDisabled);
+      } else if (e.response?.statusCode == 401 ||
+          e.response?.statusCode == 422) {
+        msg = _extractDioMessage(e, l10n.incorrectCredentials);
       }
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(msg),
-            backgroundColor: AppTheme.red,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(msg),
+          backgroundColor: AppTheme.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-        );
-      }
+        ),
+      );
+      return;
     } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${l10n.loginFailed}: $e'),
-            backgroundColor: AppTheme.red,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)),
+      if (!mounted) return;
+      final l10n = L10n.of(context)!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${l10n.loginFailed}: $e'),
+          backgroundColor: AppTheme.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-        );
-      }
+        ),
+      );
+      return;
     } finally {
-      if (context.mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
+
+    if (!mounted) return;
+    context.go('/');
   }
 }
 
@@ -624,8 +691,7 @@ class _DarkTextField extends StatelessWidget {
         hintStyle: TextStyle(color: Colors.white.withAlpha(70)),
         filled: true,
         fillColor: Colors.white.withAlpha(12),
-        prefixIcon:
-            Icon(icon, size: 18, color: Colors.white.withAlpha(100)),
+        prefixIcon: Icon(icon, size: 18, color: Colors.white.withAlpha(100)),
         suffixIcon: onToggleObscure != null
             ? IconButton(
                 icon: Icon(
@@ -686,9 +752,10 @@ class _CircleIconButtonState extends State<_CircleIconButton>
       duration: const Duration(milliseconds: 100),
       reverseDuration: const Duration(milliseconds: 180),
     );
-    _scale = Tween<double>(begin: 1.0, end: 0.88).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
-    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 0.88,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
   @override

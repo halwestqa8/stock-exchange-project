@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../features/auth/auth_provider.dart';
 import '../features/auth/splash_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/register_screen.dart';
@@ -104,8 +105,21 @@ CustomTransitionPage<T> _slideRightPage<T>({
 // ── Router ────────────────────────────────────────────────────────────────────
 
 final routerProvider = Provider<GoRouter>((ref) {
+  final auth = ref.watch(authProvider);
+
   return GoRouter(
-    initialLocation: '/splash',
+    initialLocation: auth != null ? '/' : '/splash',
+    redirect: (context, state) {
+      final loggedIn = auth != null;
+      final location = state.uri.path;
+      final isGuestRoute = location == '/splash' ||
+          location == '/login' ||
+          location == '/register';
+
+      if (!loggedIn && !isGuestRoute) return '/splash';
+      if (loggedIn && isGuestRoute) return '/';
+      return null;
+    },
     routes: [
       // ── Splash ──
       GoRoute(

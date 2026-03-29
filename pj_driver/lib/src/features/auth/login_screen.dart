@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -19,6 +21,50 @@ class _DriverLoginScreenState extends ConsumerState<DriverLoginScreen> {
   final _passCtrl = TextEditingController();
   bool _loading = false;
   bool _obscure = true;
+
+  String _extractDioMessage(DioException error, String fallback) {
+    if (error.type == DioExceptionType.connectionError ||
+        error.type == DioExceptionType.connectionTimeout ||
+        error.type == DioExceptionType.sendTimeout ||
+        error.type == DioExceptionType.receiveTimeout ||
+        error.error is SocketException) {
+      return fallback;
+    }
+
+    final data = error.response?.data;
+    if (data is Map) {
+      final errors = data['errors'];
+      if (errors is Map) {
+        for (final value in errors.values) {
+          if (value is List && value.isNotEmpty && value.first is String) {
+            return value.first as String;
+          }
+          if (value is String && value.isNotEmpty) {
+            return value;
+          }
+        }
+      }
+
+      final message = data['message'];
+      if (message is String && message.isNotEmpty) {
+        return message;
+      }
+    }
+
+    final message = error.message;
+    if (message != null && message.isNotEmpty) {
+      return message;
+    }
+
+    return fallback;
+  }
+
+  @override
+  void dispose() {
+    _emailCtrl.dispose();
+    _passCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -137,25 +183,36 @@ class _DriverLoginScreenState extends ConsumerState<DriverLoginScreen> {
     final l10n = L10n.of(context)!;
     setState(() => _loading = true);
     try {
-      await ref.read(authProvider.notifier).login(_emailCtrl.text, _passCtrl.text);
-      if (mounted) context.go('/');
+      await ref
+          .read(authProvider.notifier)
+          .login(_emailCtrl.text.trim(), _passCtrl.text);
     } on DioException catch (e) {
-      String msg = l10n.loginFailed;
+      if (!mounted) return;
+      String msg = _extractDioMessage(e, l10n.loginFailed);
       if (e.response?.statusCode == 403) {
-        msg = e.response?.data['message'] ?? l10n.accountDisabled;
-      } else if (e.response?.statusCode == 422) {
-        final errors = e.response?.data['errors'];
-        if (errors != null && errors is Map) {
-          msg = errors.values.first[0];
-        } else {
-          msg = e.response?.data['message'] ?? l10n.incorrectCredentials;
-        }
+        msg = _extractDioMessage(e, l10n.accountDisabled);
+      } else if (e.response?.statusCode == 401 ||
+          e.response?.statusCode == 422) {
+        msg = _extractDioMessage(e, l10n.incorrectCredentials);
       }
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.redAccent));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg), backgroundColor: Colors.redAccent),
+      );
+      return;
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${l10n.loginFailed}: $e'), backgroundColor: Colors.redAccent));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${l10n.loginFailed}: $e'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+
+    if (!mounted) return;
+    context.go('/');
   }
 }
