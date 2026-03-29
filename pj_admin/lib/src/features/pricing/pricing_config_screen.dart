@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pj_l10n/pj_l10n.dart';
 
+import '../../core/admin_shell.dart';
 import '../../core/api_provider.dart';
-import '../../core/dashboard_back_button.dart';
 import '../../core/response_parsing.dart';
 import '../../core/theme.dart';
 
@@ -166,26 +166,52 @@ class _PricingConfigScreenState extends ConsumerState<PricingConfigScreen> {
     final l10n = L10n.of(context)!;
     final textTheme = Theme.of(context).textTheme;
     final pricingAsync = ref.watch(pricingProvider);
+    final isCompact = MediaQuery.sizeOf(context).width < 960;
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: const DashboardBackButton(),
-        title: Text(l10n.pricingConfiguration),
-      ),
-      body: pricingAsync.when(
+    return AdminShell(
+      activeRoute: '/pricing',
+      title: l10n.pricingConfiguration,
+      actions: [
+        IconButton(
+          onPressed: () => ref.refresh(pricingProvider),
+          tooltip: l10n.refresh,
+          icon: const Icon(Icons.refresh_rounded),
+        ),
+      ],
+      child: pricingAsync.when(
         data: (config) {
           if (!_hasInitializedForm) {
             _applyConfig(config);
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(28),
+            padding: EdgeInsets.all(isCompact ? 16 : 28),
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 900),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (!isCompact) ...[
+                      Text(
+                        l10n.pricingConfiguration,
+                        style: textTheme.headlineLarge,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Update the default pricing formula used for shipments.',
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: AppTheme.muted,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ] else ...[
+                      Text(
+                        l10n.pricingConfiguration,
+                        style: textTheme.headlineSmall,
+                      ),
+                      const SizedBox(height: 16),
+                    ],
                     Text(
                       _screenText(
                         context,

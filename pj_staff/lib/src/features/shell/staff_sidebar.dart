@@ -7,14 +7,22 @@ import 'package:pj_l10n/pj_l10n.dart';
 
 class StaffSidebar extends ConsumerWidget {
   final String activeRoute;
-  const StaffSidebar({super.key, required this.activeRoute});
+  final double width;
+  final bool showUserCard;
+
+  const StaffSidebar({
+    super.key,
+    required this.activeRoute,
+    this.width = 240,
+    this.showUserCard = true,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authProvider);
 
     return Container(
-      width: 240,
+      width: width,
       color: AppTheme.ink,
       child: Column(
         children: [
@@ -29,11 +37,15 @@ class StaffSidebar extends ConsumerWidget {
                   height: 36,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                        colors: [AppTheme.indigo, Color(0xFF818CF8)]),
+                      colors: [AppTheme.indigo, Color(0xFF818CF8)],
+                    ),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Center(
-                    child: Text('\u{1F4CB}', style: TextStyle(fontSize: 18)), // Clipboard 📋
+                    child: Text(
+                      '\u{1F4CB}',
+                      style: TextStyle(fontSize: 18),
+                    ), // Clipboard 📋
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -51,10 +63,20 @@ class StaffSidebar extends ConsumerWidget {
           const SizedBox(height: 32),
 
           // ── Nav Items ──
-          _navItem(context, '\u{1F3E0}', L10n.of(context)!.dashboard, activeRoute == '/', // House 🏠
-              () => context.go('/')),
-          _navItem(context, '\u{1F4CA}', L10n.of(context)!.reports, activeRoute == '/reports', // Chart 📊
-              () => context.go('/reports')),
+          _navItem(
+            context,
+            '\u{1F3E0}',
+            L10n.of(context)!.dashboard,
+            activeRoute == '/', // House 🏠
+            () => context.go('/'),
+          ),
+          _navItem(
+            context,
+            '\u{1F4CA}',
+            L10n.of(context)!.reports,
+            activeRoute == '/reports', // Chart 📊
+            () => context.go('/reports'),
+          ),
           _navItem(
             context,
             '\u{1F514}', // Bell 🔔
@@ -62,87 +84,95 @@ class StaffSidebar extends ConsumerWidget {
             activeRoute == '/notifications',
             () => context.go('/notifications'),
           ),
-          _navItem(context, '\u{2699}', L10n.of(context)!.settings, activeRoute == '/settings', // Gear ⚙️
-              () => context.go('/settings')),
+          _navItem(
+            context,
+            '\u{2699}',
+            L10n.of(context)!.settings,
+            activeRoute == '/settings', // Gear ⚙️
+            () => context.go('/settings'),
+          ),
 
           const Spacer(),
 
           // ── User Card ──
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white.withAlpha(13),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                          colors: [AppTheme.indigo, Color(0xFF818CF8)]),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Text(
-                        (user?.name ?? 'S')[0].toUpperCase(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          user?.name ?? L10n.of(context)!.staff,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          user?.email ?? 'staff@ltms.app',
-                          style: TextStyle(
-                            color: Colors.white.withAlpha(100),
-                            fontSize: 10,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () => _confirmLogout(context, ref),
-                    child: Container(
-                      width: 28,
-                      height: 28,
+          if (showUserCard) ...[
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withAlpha(13),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
                       decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(10),
+                        gradient: const LinearGradient(
+                          colors: [AppTheme.indigo, Color(0xFF818CF8)],
+                        ),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Icon(
-                        Icons.logout_rounded,
-                        size: 15,
-                        color: Colors.white.withAlpha(120),
+                      child: Center(
+                        child: Text(
+                          (user?.name ?? 'S')[0].toUpperCase(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            user?.name ?? L10n.of(context)!.staff,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            user?.email ?? 'staff@ltms.app',
+                            style: TextStyle(
+                              color: Colors.white.withAlpha(100),
+                              fontSize: 10,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => _confirmLogout(context, ref),
+                      child: Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(10),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          Icons.logout_rounded,
+                          size: 15,
+                          color: Colors.white.withAlpha(120),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 8),
+            const SizedBox(height: 8),
+          ],
         ],
       ),
     );
@@ -174,8 +204,7 @@ class StaffSidebar extends ConsumerWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                  color:
-                      active ? Colors.white : Colors.white.withAlpha(128),
+                  color: active ? Colors.white : Colors.white.withAlpha(128),
                 ),
               ),
             ),
@@ -198,17 +227,19 @@ class StaffSidebar extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(L10n.of(context)!.signOut,
-            style: const TextStyle(fontWeight: FontWeight.w800)),
-        content: Text(
-            L10n.of(context)!.signOutConfirmStaff),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          L10n.of(context)!.signOut,
+          style: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+        content: Text(L10n.of(context)!.signOutConfirmStaff),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(L10n.of(context)!.cancel,
-                style: TextStyle(color: AppTheme.muted)),
+            child: Text(
+              L10n.of(context)!.cancel,
+              style: TextStyle(color: AppTheme.muted),
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -219,7 +250,9 @@ class StaffSidebar extends ConsumerWidget {
             child: Text(
               L10n.of(context)!.signOut,
               style: const TextStyle(
-                  color: AppTheme.red, fontWeight: FontWeight.w700),
+                color: AppTheme.red,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],

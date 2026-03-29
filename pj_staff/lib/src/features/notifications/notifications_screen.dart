@@ -6,16 +6,21 @@ import 'package:image_picker/image_picker.dart';
 import '../../core/api_provider.dart';
 import '../../core/theme.dart';
 import 'package:pj_l10n/pj_l10n.dart';
+import '../shell/staff_shell.dart';
 
 // ── Providers ──────────────────────────────────────────────────────────────
 
-final customersProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final customersProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
   final res = await ref.read(apiClientProvider).getCustomers();
   final List data = res.data is List ? res.data : (res.data['data'] ?? []);
   return data.cast<Map<String, dynamic>>();
 });
 
-final sentNotificationsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final sentNotificationsProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
   final res = await ref.read(apiClientProvider).getSentNotifications();
   final List data = res.data['data'] ?? [];
   return data.cast<Map<String, dynamic>>();
@@ -52,9 +57,17 @@ class _StaffNotificationsScreenState
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
 
-    return Scaffold(
-      backgroundColor: AppTheme.surface,
-      body: SafeArea(
+    return StaffShell(
+      activeRoute: '/notifications',
+      title: L10n.of(context)!.notifications,
+      actions: [
+        IconButton(
+          onPressed: () => _openCompose(context),
+          icon: const Icon(Icons.send_rounded),
+          tooltip: L10n.of(context)!.sendNotification,
+        ),
+      ],
+      child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -67,9 +80,15 @@ class _StaffNotificationsScreenState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(L10n.of(context)!.notifications, style: tt.displaySmall),
+                        Text(
+                          L10n.of(context)!.notifications,
+                          style: tt.displaySmall,
+                        ),
                         const SizedBox(height: 2),
-                        Text(L10n.of(context)!.sendUpdatesSubtitle, style: tt.bodySmall),
+                        Text(
+                          L10n.of(context)!.sendUpdatesSubtitle,
+                          style: tt.bodySmall,
+                        ),
                       ],
                     ),
                   ),
@@ -81,13 +100,18 @@ class _StaffNotificationsScreenState
                       foregroundColor: Colors.white,
                       minimumSize: const Size(0, 40),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       elevation: 0,
                     ),
                     icon: const Icon(Icons.send_rounded, size: 16),
-                    label: Text(L10n.of(context)!.sendBtn,
-                        style: const TextStyle(
-                            fontSize: 13, fontWeight: FontWeight.w700)),
+                    label: Text(
+                      L10n.of(context)!.sendBtn,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -115,7 +139,9 @@ class _StaffNotificationsScreenState
                   labelColor: Colors.white,
                   unselectedLabelColor: AppTheme.muted,
                   labelStyle: const TextStyle(
-                      fontSize: 12, fontWeight: FontWeight.w700),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
                   tabs: [
                     Tab(text: L10n.of(context)!.sentTab),
                     Tab(text: L10n.of(context)!.customersTab),
@@ -131,10 +157,15 @@ class _StaffNotificationsScreenState
                 controller: _tab,
                 children: [
                   _SentTab(onCompose: () => _openCompose(context)),
-                  _CustomersTab(onSelect: (id, name) {
-                    _openCompose(context,
-                        preselectedId: id, preselectedName: name);
-                  }),
+                  _CustomersTab(
+                    onSelect: (id, name) {
+                      _openCompose(
+                        context,
+                        preselectedId: id,
+                        preselectedName: name,
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -144,8 +175,11 @@ class _StaffNotificationsScreenState
     );
   }
 
-  void _openCompose(BuildContext context,
-      {int? preselectedId, String? preselectedName}) {
+  void _openCompose(
+    BuildContext context, {
+    int? preselectedId,
+    String? preselectedName,
+  }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -181,10 +215,12 @@ class _SentTab extends ConsumerWidget {
               children: [
                 const Text('📭', style: TextStyle(fontSize: 44)),
                 const SizedBox(height: 10),
-                Text(L10n.of(context)!.noNotificationsSent, style: tt.titleMedium),
+                Text(
+                  L10n.of(context)!.noNotificationsSent,
+                  style: tt.titleMedium,
+                ),
                 const SizedBox(height: 4),
-                Text(L10n.of(context)!.tapSendToNotify,
-                    style: tt.bodySmall),
+                Text(L10n.of(context)!.tapSendToNotify, style: tt.bodySmall),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: onCompose,
@@ -192,7 +228,8 @@ class _SentTab extends ConsumerWidget {
                     backgroundColor: AppTheme.indigo,
                     minimumSize: const Size(0, 40),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: Text(L10n.of(context)!.sendNotification),
                 ),
@@ -255,8 +292,9 @@ class _SentCard extends StatelessWidget {
           // Image
           if (imageUrl != null && imageUrl.isNotEmpty)
             ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(17)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(17),
+              ),
               child: Image.network(
                 resolveApiUrl(imageUrl),
                 height: 160,
@@ -299,57 +337,66 @@ class _SentCard extends StatelessWidget {
                           Text(
                             customer?['name'] ?? L10n.of(context)!.customer,
                             style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: AppTheme.ink),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.ink,
+                            ),
                           ),
                           if (customer?['email'] != null)
                             Text(
                               customer!['email'],
                               style: const TextStyle(
-                                  fontSize: 11, color: AppTheme.muted),
+                                fontSize: 11,
+                                color: AppTheme.muted,
+                              ),
                             ),
                         ],
                       ),
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTheme.tealLight,
                         borderRadius: BorderRadius.circular(100),
                       ),
-                      child: Text(L10n.of(context)!.sentBadge,
-                          style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                              color: AppTheme.teal)),
+                      child: Text(
+                        L10n.of(context)!.sentBadge,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.teal,
+                        ),
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 10),
 
                 // Message
-                Text(
-                  notif['message_en'] ?? '',
-                  style: tt.bodyMedium,
-                ),
+                Text(notif['message_en'] ?? '', style: tt.bodyMedium),
 
                 // Location
                 if (location != null && location.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.location_on_rounded,
-                          size: 14, color: AppTheme.indigo),
+                      const Icon(
+                        Icons.location_on_rounded,
+                        size: 14,
+                        color: AppTheme.indigo,
+                      ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           location,
                           style: const TextStyle(
-                              fontSize: 12,
-                              color: AppTheme.indigo,
-                              fontWeight: FontWeight.w600),
+                            fontSize: 12,
+                            color: AppTheme.indigo,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
@@ -418,9 +465,10 @@ class _CustomersTab extends ConsumerWidget {
                       child: Text(
                         name.isNotEmpty ? name[0].toUpperCase() : '?',
                         style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                            color: AppTheme.indigo),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: AppTheme.indigo,
+                        ),
                       ),
                     ),
                   ),
@@ -429,14 +477,21 @@ class _CustomersTab extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(name,
-                            style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: AppTheme.ink)),
-                        Text(email,
-                            style: const TextStyle(
-                                fontSize: 12, color: AppTheme.muted)),
+                        Text(
+                          name,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.ink,
+                          ),
+                        ),
+                        Text(
+                          email,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.muted,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -448,12 +503,17 @@ class _CustomersTab extends ConsumerWidget {
                       minimumSize: const Size(0, 34),
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                       elevation: 0,
                     ),
-                    child: Text(L10n.of(context)!.notifyBtn,
-                        style: const TextStyle(
-                            fontSize: 12, fontWeight: FontWeight.w700)),
+                    child: Text(
+                      L10n.of(context)!.notifyBtn,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -468,7 +528,10 @@ class _CustomersTab extends ConsumerWidget {
           children: [
             const Text('⚠️', style: TextStyle(fontSize: 36)),
             const SizedBox(height: 8),
-            Text(L10n.of(context)!.failedToLoadCustomers, style: tt.titleMedium),
+            Text(
+              L10n.of(context)!.failedToLoadCustomers,
+              style: tt.titleMedium,
+            ),
             const SizedBox(height: 12),
             OutlinedButton(
               onPressed: () => ref.refresh(customersProvider.future),
@@ -554,15 +617,19 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                  color: AppTheme.border,
-                  borderRadius: BorderRadius.circular(2)),
+                color: AppTheme.border,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
             const SizedBox(height: 16),
-            Text(L10n.of(context)!.addPhoto,
-                style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: AppTheme.ink)),
+            Text(
+              L10n.of(context)!.addPhoto,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: AppTheme.ink,
+              ),
+            ),
             const SizedBox(height: 16),
             _imageOptionTile(
               emoji: '📷',
@@ -600,11 +667,12 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
     );
   }
 
-  Widget _imageOptionTile(
-      {required String emoji,
-      required String label,
-      required VoidCallback onTap,
-      Color? color}) {
+  Widget _imageOptionTile({
+    required String emoji,
+    required String label,
+    required VoidCallback onTap,
+    Color? color,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -613,17 +681,21 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
           color: color != null ? color.withAlpha(15) : AppTheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-              color: color != null ? color.withAlpha(60) : AppTheme.border),
+            color: color != null ? color.withAlpha(60) : AppTheme.border,
+          ),
         ),
         child: Row(
           children: [
             Text(emoji, style: const TextStyle(fontSize: 20)),
             const SizedBox(width: 12),
-            Text(label,
-                style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: color ?? AppTheme.ink)),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: color ?? AppTheme.ink,
+              ),
+            ),
           ],
         ),
       ),
@@ -655,17 +727,21 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                    color: AppTheme.border,
-                    borderRadius: BorderRadius.circular(2)),
+                  color: AppTheme.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
               const SizedBox(height: 14),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18),
-                child: Text(L10n.of(context)!.selectCustomer,
-                    style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: AppTheme.ink)),
+                child: Text(
+                  L10n.of(context)!.selectCustomer,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.ink,
+                  ),
+                ),
               ),
               const SizedBox(height: 10),
               const Divider(height: 1),
@@ -675,11 +751,15 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
                     : ListView.builder(
                         controller: scrollCtrl,
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         itemCount: customers.length,
                         itemBuilder: (ctx, i) {
                           final c = customers[i];
-                          final name = c['name'] as String? ?? L10n.of(context)!.customer;
+                          final name =
+                              c['name'] as String? ??
+                              L10n.of(context)!.customer;
                           final email = c['email'] as String? ?? '';
                           final id = c['id'] as int;
                           final isSelected = _selectedCustomerId == id;
@@ -700,10 +780,11 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
                                     : AppTheme.surface,
                                 borderRadius: BorderRadius.circular(14),
                                 border: Border.all(
-                                    color: isSelected
-                                        ? AppTheme.indigo
-                                        : AppTheme.border,
-                                    width: 1.5),
+                                  color: isSelected
+                                      ? AppTheme.indigo
+                                      : AppTheme.border,
+                                  width: 1.5,
+                                ),
                               ),
                               child: Row(
                                 children: [
@@ -722,11 +803,12 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
                                             ? name[0].toUpperCase()
                                             : '?',
                                         style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w800,
-                                            color: isSelected
-                                                ? AppTheme.indigo
-                                                : AppTheme.muted),
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w800,
+                                          color: isSelected
+                                              ? AppTheme.indigo
+                                              : AppTheme.muted,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -736,23 +818,32 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text(name,
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w700,
-                                                color: isSelected
-                                                    ? AppTheme.indigo
-                                                    : AppTheme.ink)),
-                                        Text(email,
-                                            style: const TextStyle(
-                                                fontSize: 12,
-                                                color: AppTheme.muted)),
+                                        Text(
+                                          name,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w700,
+                                            color: isSelected
+                                                ? AppTheme.indigo
+                                                : AppTheme.ink,
+                                          ),
+                                        ),
+                                        Text(
+                                          email,
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: AppTheme.muted,
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),
                                   if (isSelected)
-                                    const Icon(Icons.check_circle_rounded,
-                                        color: AppTheme.indigo, size: 20),
+                                    const Icon(
+                                      Icons.check_circle_rounded,
+                                      color: AppTheme.indigo,
+                                      size: 20,
+                                    ),
                                 ],
                               ),
                             ),
@@ -788,8 +879,12 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
     });
 
     try {
-      final bytes = _pickedImage != null ? await _pickedImage!.readAsBytes() : null;
-      await ref.read(apiClientProvider).sendNotification(
+      final bytes = _pickedImage != null
+          ? await _pickedImage!.readAsBytes()
+          : null;
+      await ref
+          .read(apiClientProvider)
+          .sendNotification(
             customerId: _selectedCustomerId!,
             messageEn: _msgEnCtrl.text.trim(),
             messageku: _msgKuCtrl.text.trim(),
@@ -846,8 +941,9 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                        color: AppTheme.border,
-                        borderRadius: BorderRadius.circular(2)),
+                      color: AppTheme.border,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -863,15 +959,18 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Center(
-                          child:
-                              Text('📢', style: TextStyle(fontSize: 18))),
+                        child: Text('📢', style: TextStyle(fontSize: 18)),
+                      ),
                     ),
                     const SizedBox(width: 10),
-                    Text(L10n.of(context)!.sendNotification,
-                        style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                            color: AppTheme.ink)),
+                    Text(
+                      L10n.of(context)!.sendNotification,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: AppTheme.ink,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -883,20 +982,21 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
                     decoration: BoxDecoration(
                       color: AppTheme.redLight,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                          color: AppTheme.red.withAlpha(60)),
+                      border: Border.all(color: AppTheme.red.withAlpha(60)),
                     ),
                     child: Row(
                       children: [
-                        const Text('⚠️',
-                            style: TextStyle(fontSize: 16)),
+                        const Text('⚠️', style: TextStyle(fontSize: 16)),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: Text(_error!,
-                              style: const TextStyle(
-                                  color: AppTheme.red,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13)),
+                          child: Text(
+                            _error!,
+                            style: const TextStyle(
+                              color: AppTheme.red,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -905,26 +1005,32 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
                 ],
 
                 // ── Customer Picker ──
-                Text(L10n.of(context)!.toCustomerLabel,
-                    style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.muted,
-                        letterSpacing: 0.5)),
+                Text(
+                  L10n.of(context)!.toCustomerLabel,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.muted,
+                    letterSpacing: 0.5,
+                  ),
+                ),
                 const SizedBox(height: 6),
                 GestureDetector(
                   onTap: _showCustomerPicker,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 13),
+                      horizontal: 14,
+                      vertical: 13,
+                    ),
                     decoration: BoxDecoration(
                       color: AppTheme.card,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                          color: _selectedCustomerId != null
-                              ? AppTheme.indigo
-                              : AppTheme.border,
-                          width: 1.5),
+                        color: _selectedCustomerId != null
+                            ? AppTheme.indigo
+                            : AppTheme.border,
+                        width: 1.5,
+                      ),
                     ),
                     child: Row(
                       children: [
@@ -938,22 +1044,26 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            _selectedCustomerName ?? L10n.of(context)!.selectCustomerHint,
+                            _selectedCustomerName ??
+                                L10n.of(context)!.selectCustomerHint,
                             style: TextStyle(
-                                fontSize: 14,
-                                color: _selectedCustomerId != null
-                                    ? AppTheme.ink
-                                    : AppTheme.muted,
-                                fontWeight: _selectedCustomerId != null
-                                    ? FontWeight.w600
-                                    : FontWeight.w400),
+                              fontSize: 14,
+                              color: _selectedCustomerId != null
+                                  ? AppTheme.ink
+                                  : AppTheme.muted,
+                              fontWeight: _selectedCustomerId != null
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
+                            ),
                           ),
                         ),
-                        Icon(Icons.keyboard_arrow_down_rounded,
-                            size: 20,
-                            color: _selectedCustomerId != null
-                                ? AppTheme.indigo
-                                : AppTheme.muted),
+                        Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          size: 20,
+                          color: _selectedCustomerId != null
+                              ? AppTheme.indigo
+                              : AppTheme.muted,
+                        ),
                       ],
                     ),
                   ),
@@ -961,30 +1071,39 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
                 const SizedBox(height: 16),
 
                 // ── Location ──
-                Text(L10n.of(context)!.locationLabel,
-                    style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.muted,
-                        letterSpacing: 0.5)),
+                Text(
+                  L10n.of(context)!.locationLabel,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.muted,
+                    letterSpacing: 0.5,
+                  ),
+                ),
                 const SizedBox(height: 6),
                 TextField(
                   controller: _locationCtrl,
                   decoration: InputDecoration(
                     hintText: L10n.of(context)!.locationHint,
-                    prefixIcon: const Icon(Icons.location_on_rounded,
-                        size: 18, color: AppTheme.indigo),
+                    prefixIcon: const Icon(
+                      Icons.location_on_rounded,
+                      size: 18,
+                      color: AppTheme.indigo,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
 
                 // ── Message EN ──
-                Text(L10n.of(context)!.messageEnLabel,
-                    style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.muted,
-                        letterSpacing: 0.5)),
+                Text(
+                  L10n.of(context)!.messageEnLabel,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.muted,
+                    letterSpacing: 0.5,
+                  ),
+                ),
                 const SizedBox(height: 6),
                 TextField(
                   controller: _msgEnCtrl,
@@ -996,12 +1115,15 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
                 const SizedBox(height: 16),
 
                 // ── Message KU ──
-                Text(L10n.of(context)!.messageKuLabel,
-                    style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.muted,
-                        letterSpacing: 0.5)),
+                Text(
+                  L10n.of(context)!.messageKuLabel,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.muted,
+                    letterSpacing: 0.5,
+                  ),
+                ),
                 const SizedBox(height: 6),
                 TextField(
                   controller: _msgKuCtrl,
@@ -1014,12 +1136,15 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
                 const SizedBox(height: 16),
 
                 // ── Image ──
-                Text(L10n.of(context)!.photoOptionalLabel,
-                    style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.muted,
-                        letterSpacing: 0.5)),
+                Text(
+                  L10n.of(context)!.photoOptionalLabel,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.muted,
+                    letterSpacing: 0.5,
+                  ),
+                ),
                 const SizedBox(height: 6),
                 GestureDetector(
                   onTap: _showImageOptions,
@@ -1055,8 +1180,11 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
                                     color: Colors.black.withAlpha(140),
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const Icon(Icons.close_rounded,
-                                      size: 16, color: Colors.white),
+                                  child: const Icon(
+                                    Icons.close_rounded,
+                                    size: 16,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                             ),
@@ -1065,16 +1193,21 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
                               right: 8,
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 4),
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.black.withAlpha(140),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Text(L10n.of(context)!.tapToChange,
-                                    style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600)),
+                                child: Text(
+                                  L10n.of(context)!.tapToChange,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ),
                             ),
                           ],
@@ -1085,9 +1218,10 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
                             color: AppTheme.surface,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                                color: AppTheme.border,
-                                width: 1.5,
-                                style: BorderStyle.solid),
+                              color: AppTheme.border,
+                              width: 1.5,
+                              style: BorderStyle.solid,
+                            ),
                           ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -1100,19 +1234,29 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: const Center(
-                                    child: Text('📷',
-                                        style: TextStyle(fontSize: 20))),
+                                  child: Text(
+                                    '📷',
+                                    style: TextStyle(fontSize: 20),
+                                  ),
+                                ),
                               ),
                               const SizedBox(height: 8),
-                              Text(L10n.of(context)!.tapToAddPhoto,
-                                  style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppTheme.indigo)),
+                              Text(
+                                L10n.of(context)!.tapToAddPhoto,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppTheme.indigo,
+                                ),
+                              ),
                               const SizedBox(height: 2),
-                              Text(L10n.of(context)!.cameraOrGallery,
-                                  style: const TextStyle(
-                                      fontSize: 11, color: AppTheme.muted)),
+                              Text(
+                                L10n.of(context)!.cameraOrGallery,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: AppTheme.muted,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -1127,7 +1271,8 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
                     foregroundColor: Colors.white,
                     minimumSize: const Size(double.infinity, 52),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     elevation: 0,
                   ),
                   child: _loading
@@ -1135,16 +1280,22 @@ class _ComposeSheetState extends ConsumerState<_ComposeSheet> {
                           width: 22,
                           height: 22,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2.5, color: Colors.white))
+                            strokeWidth: 2.5,
+                            color: Colors.white,
+                          ),
+                        )
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Icon(Icons.send_rounded, size: 18),
                             const SizedBox(width: 8),
-                            Text(L10n.of(context)!.sendNotification,
-                                style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w700)),
+                            Text(
+                              L10n.of(context)!.sendNotification,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ],
                         ),
                 ),
