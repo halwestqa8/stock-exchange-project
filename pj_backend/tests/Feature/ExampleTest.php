@@ -10,10 +10,20 @@ class ExampleTest extends TestCase
     /**
      * A basic test example.
      */
-    public function test_the_application_returns_a_successful_response(): void
+    public function test_the_application_returns_a_backend_status_payload(): void
     {
         $response = $this->get('/');
 
-        $response->assertStatus(200);
+        $response
+            ->assertOk()
+            ->assertJson([
+                'service' => 'Backend API',
+                'status' => 'ok',
+                'message' => 'Backend API is running.',
+                'endpoints' => [
+                    'health' => '/up',
+                    'api' => '/api/v1',
+                ],
+            ]);
     }
 }

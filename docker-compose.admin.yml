@@ -5,7 +5,8 @@ services:
       dockerfile: docker/flutter_web.Dockerfile
       args:
         APP_DIR: pj_admin
-        BASE_URL: http://ltsmapi.45.32.155.226.sslip.io
+        BASE_URL: ${API_BASE_URL:-http://localhost:8000}
+    restart: unless-stopped
     networks:
       - app-network
 
