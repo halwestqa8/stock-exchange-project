@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pj_l10n/pj_l10n.dart';
 
@@ -9,8 +10,15 @@ import '../../core/theme.dart';
 import 'create_user_dialog.dart';
 
 final usersProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
-  final response = await ref.read(apiClientProvider).getAdminUsers();
-  return extractMapList(response.data);
+  try {
+    final response = await ref.read(apiClientProvider).getAdminUsers();
+    return extractMapList(response.data);
+  } on DioException catch (e) {
+    if (e.response?.statusCode == 403) {
+      throw Exception('Only super admins can manage users.');
+    }
+    rethrow;
+  }
 });
 
 class UserManagementScreen extends ConsumerStatefulWidget {

@@ -102,31 +102,50 @@ class _CreateUserDialogState extends ConsumerState<CreateUserDialog> {
 
     setState(() => _isLoading = true);
 
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    final l10n = L10n.of(context)!;
+    final selectedRole = _selectedRole!;
+
     if (_selectedRole == 'admin' && _generatedKey == null) {
       _generateKey();
     }
+
+    final createdAdmin = selectedRole == 'admin' && _generatedKey != null;
+    final successMessage = createdAdmin
+        ? _screenText(
+            context,
+            ku: 'هەژمارەکە دروستکرا. کلیلی ئەدمین کۆپی کرا.',
+            en: 'User created. Admin key copied.',
+          )
+        : l10n.userCreated;
 
     try {
       await ref.read(apiClientProvider).createUserByAdmin({
         'name': _nameCtrl.text.trim(),
         'email': _emailCtrl.text.trim(),
         'password': _passwordCtrl.text,
-        'role': _rolePayload(_selectedRole!),
+        'role': _rolePayload(selectedRole),
+        if (selectedRole == 'admin') 'admin_key': _generatedKey,
       });
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
+      if (createdAdmin) {
+        await Clipboard.setData(ClipboardData(text: _generatedKey!));
+        if (!mounted) return;
+      }
+      messenger
         ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(L10n.of(context)!.userCreated)));
-      Navigator.of(context).pop(true);
+        ..showSnackBar(SnackBar(content: Text(successMessage)));
+      navigator.pop(true);
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
+      messenger
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
             content: Text(
-              '${L10n.of(context)!.error}: ${_extractErrorMessage(error)}',
+              '${l10n.error}: ${_extractErrorMessage(error)}',
             ),
           ),
         );
@@ -317,6 +336,15 @@ class _CreateUserDialogState extends ConsumerState<CreateUserDialog> {
                           ),
                         ],
                       ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _screenText(
+                        context,
+                        ku: 'تکایە ئەم کلیـلە هەڵبگرە. بۆ چوونەژوورەوەی ئەدمین پێویستە.',
+                        en: 'Save this key. It is required for admin sign-in.',
+                      ),
+                      style: textTheme.bodySmall?.copyWith(color: AppTheme.muted),
                     ),
                   ],
                 ),

@@ -8,6 +8,7 @@ use App\Models\PricingConfig;
 use App\Models\User;
 use App\Models\Faq;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
@@ -24,14 +25,21 @@ class AdminController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6',
             'role' => 'required|in:staff,driver,super_admin',
+            'admin_key' => 'nullable|uuid|required_if:role,super_admin',
         ]);
 
-        $user = User::create([
+        $attributes = [
             'name' => $request->name,
             'email' => $request->email,
-            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'password' => Hash::make($request->password),
             'role' => $request->role,
-        ]);
+        ];
+
+        if ($request->role === 'super_admin') {
+            $attributes['admin_key_hash'] = Hash::make($request->admin_key);
+        }
+
+        $user = User::create($attributes);
 
         return response()->json($user, 201);
     }

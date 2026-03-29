@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pj_domain/pj_domain.dart';
+import '../features/auth/auth_provider.dart';
 import '../features/auth/login_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/users/user_management_screen.dart';
@@ -111,8 +113,30 @@ CustomTransitionPage<T> _slideRightFadePage<T>({
 // ── Router ────────────────────────────────────────────────────────────────────
 
 final routerProvider = Provider<GoRouter>((ref) {
+  final auth = ref.watch(authProvider);
+
   return GoRouter(
-    initialLocation: '/login',
+    initialLocation: auth != null ? '/' : '/login',
+    redirect: (context, state) {
+      final currentUser = auth;
+      final loggedIn = currentUser != null;
+      final onLogin = state.matchedLocation == '/login';
+      final onUsers = state.matchedLocation == '/users';
+
+      if (!loggedIn && !onLogin) {
+        return '/login';
+      }
+
+      if (loggedIn && onLogin) {
+        return '/';
+      }
+
+      if (loggedIn && onUsers && currentUser.role != UserRole.superAdmin) {
+        return '/';
+      }
+
+      return null;
+    },
     routes: [
       // ── Login ──
       GoRoute(
