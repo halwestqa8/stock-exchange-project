@@ -18,7 +18,11 @@ class AuthNotifier extends StateNotifier<User?> {
         throw Exception('کلیلی ئەدمین پێویستە');
       }
 
-      final response = await _apiClient.login(email, password);
+      final response = await _apiClient.login(
+        email,
+        password,
+        adminKey: adminKey.trim(),
+      );
       final data = Map<String, dynamic>.from(response.data as Map);
       final token = data['access_token'] as String?;
       final rawUser = data['user'];
@@ -34,8 +38,8 @@ class AuthNotifier extends StateNotifier<User?> {
     } on DioException catch (e) {
       final message =
           (e.response?.data is Map && e.response?.data['message'] is String)
-              ? e.response!.data['message'] as String
-              : e.message ?? 'چوونەژوورەوە سەرکەوتوو نەبوو';
+          ? e.response!.data['message'] as String
+          : e.message ?? 'چوونەژوورەوە سەرکەوتوو نەبوو';
       throw Exception(message);
     } catch (e) {
       rethrow;

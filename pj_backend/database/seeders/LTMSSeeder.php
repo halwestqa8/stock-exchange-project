@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Hash;
 
 class LTMSSeeder extends Seeder
 {
+    private const DEFAULT_SUPER_ADMIN_KEY = '11111111-1111-1111-1111-111111111111';
+
     public function run(): void
     {
         User::updateOrCreate([
@@ -19,6 +21,7 @@ class LTMSSeeder extends Seeder
         ], [
             'name' => 'Super Admin',
             'password' => Hash::make(env('SEED_SUPER_ADMIN_PASSWORD', 'password')),
+            'admin_key_hash' => Hash::make(env('SEED_SUPER_ADMIN_KEY', self::DEFAULT_SUPER_ADMIN_KEY)),
             'role' => 'super_admin',
             'is_active' => true,
         ]);

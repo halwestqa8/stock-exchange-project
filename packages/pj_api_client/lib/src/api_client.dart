@@ -24,10 +24,20 @@ class ApiClient {
   void setToken(String? token) => _interceptor.setToken(token);
 
   // Auth
-  Future<Response> login(String email, String password, {String? deviceToken}) {
+  Future<Response> login(
+    String email,
+    String password, {
+    String? adminKey,
+    String? deviceToken,
+  }) {
     return _dio.post(
       '/api/v1/auth/login',
-      data: {'email': email, 'password': password, 'device_token': deviceToken},
+      data: {
+        'email': email,
+        'password': password,
+        'admin_key': adminKey,
+        'device_token': deviceToken,
+      },
     );
   }
 

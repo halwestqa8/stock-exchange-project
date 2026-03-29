@@ -39,6 +39,7 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
+            'admin_key' => 'nullable|uuid',
             'device_token' => 'nullable|string',
         ]);
 
@@ -52,6 +53,20 @@ class AuthController extends Controller
 
         if (!$user->is_active) {
             return response()->json(['message' => 'Account is disabled.'], 403);
+        }
+
+        if ($user->role === 'super_admin') {
+            if (!$user->admin_key_hash) {
+                return response()->json([
+                    'message' => 'Admin key is not configured for this account.',
+                ], 403);
+            }
+
+            if (!$request->filled('admin_key') || !Hash::check($request->admin_key, $user->admin_key_hash)) {
+                throw ValidationException::withMessages([
+                    'admin_key' => ['The provided admin key is incorrect.'],
+                ]);
+            }
         }
 
         if ($request->device_token) {
