@@ -68,10 +68,8 @@ class KurdishMaterialLocalizations extends GlobalMaterialLocalizations {
   @override
   String get previousMonthTooltip => 'مانگی پێشوو';
 
-  @override
   String get nextDayTooltip => 'ڕۆژی داهاتوو';
 
-  @override
   String get previousDayTooltip => 'ڕۆژی پێشوو';
 
   @override
@@ -89,7 +87,6 @@ class KurdishMaterialLocalizations extends GlobalMaterialLocalizations {
   @override
   String get alertDialogLabel => 'ئاگادارکردنەوە';
 
-  @override
   String get searchLabel => 'گەڕان';
 
   @override
@@ -147,13 +144,11 @@ class KurdishMaterialLocalizations extends GlobalMaterialLocalizations {
   @override
   String get collapsedIconTapHint => 'گەورەکردن';
 
-  @override
   String get spaceBarButtonLabel => 'بۆشایی';
 
   @override
   String get refreshIndicatorSemanticLabel => 'نوێکردنەوە';
 
-  @override
   String get routeButtonTooltip => 'ڕێگا';
 
   @override
@@ -172,7 +167,7 @@ class KurdishMaterialLocalizations extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'هەڵبژاردنی بەروار';
 
   @override
-  String dateRangeEndDateSemanticLabel(String fullDate) => 'بەرواری کۆتایی $fullDate';
+  String dateRangeEndDateSemanticLabel(String formattedDate) => 'بەرواری کۆتایی $formattedDate';
 
   @override
   String get dateRangeEndLabel => 'بەرواری کۆتایی';
@@ -181,7 +176,7 @@ class KurdishMaterialLocalizations extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'مەودای بەروار هەڵبژێرە';
 
   @override
-  String dateRangeStartDateSemanticLabel(String fullDate) => 'بەرواری دەستپێک $fullDate';
+  String dateRangeStartDateSemanticLabel(String formattedDate) => 'بەرواری دەستپێک $formattedDate';
 
   @override
   String get dateRangeStartLabel => 'بەرواری دەستپێک';
@@ -295,7 +290,6 @@ class KurdishMaterialLocalizations extends GlobalMaterialLocalizations {
   @override
   String get keyboardKeyMeta => 'Meta';
 
-  @override
   String get keyboardKeyMetaMac => 'Command';
 
   @override
@@ -355,10 +349,8 @@ class KurdishMaterialLocalizations extends GlobalMaterialLocalizations {
   @override
   String get keyboardKeyNumpadMultiply => 'Num *';
 
-  @override
   String get keyboardKeyNumpadParenthesisLeft => 'Num (';
 
-  @override
   String get keyboardKeyNumpadParenthesisRight => 'Num )';
 
   @override
@@ -385,7 +377,6 @@ class KurdishMaterialLocalizations extends GlobalMaterialLocalizations {
   @override
   String get keyboardKeySpace => 'Space';
 
-  @override
   String get keyboardKeyTab => 'Tab';
 
   @override
@@ -400,10 +391,8 @@ class KurdishMaterialLocalizations extends GlobalMaterialLocalizations {
   @override
   String get shareButtonLabel => 'هاوبەشکردن...';
 
-  @override
   String get scrubInstructionBackwards => 'بۆ دواوە بکشێنە';
 
-  @override
   String get scrubInstructionForwards => 'بۆ پێشەوە بکشێنە';
 
   @override
@@ -415,22 +404,17 @@ class KurdishMaterialLocalizations extends GlobalMaterialLocalizations {
   @override
   List<String> get narrowWeekdays => const <String>['ی', 'د', 'س', 'چ', 'پ', 'ه', 'ش'];
 
-  @override
   List<String> get shortWeekdays => const <String>['یەک', 'دوو', 'سێ', 'چوار', 'پێنج', 'هەینی', 'شەم'];
 
-  @override
   List<String> get longWeekdays => const <String>['یەکشەممە', 'دووشەممە', 'سێشەممە', 'چوارشەممە', 'پێنجشەممە', 'هەینی', 'شەممە'];
 
-  @override
   List<String> get shortMonths => const <String>['ک٢', 'شوب', 'ئاز', 'نیس', 'ئای', 'حوز', 'تەم', 'ئاب', 'ئەی', 'ت١', 'ت٢', 'ک١'];
 
-  @override
   List<String> get longMonths => const <String>['کانوونی دووەم', 'شوبات', 'ئازار', 'نیسان', 'ئایار', 'حوزەیران', 'تەممووز', 'ئاب', 'ئەیلوول', 'تشرینی یەکەم', 'تشرینی دووەم', 'کانوونی یەکەم'];
 
   @override
   String get aboutListTileTitleRaw => r'دەربارەی $applicationName';
 
-  @override
   String selectedRowsCountTitle(int selectedRowCount) {
     if (selectedRowCount == 0) return 'هیچ ڕیزێک هەڵنەبژێردراوە';
     if (selectedRowCount == 1) return '١ ڕیز هەڵبژێردراوە';
@@ -438,11 +422,11 @@ class KurdishMaterialLocalizations extends GlobalMaterialLocalizations {
   }
 
   @override
-  String pageRowsInfoTitle(int firstRowIndex, int lastRowIndex, int rowCount, bool rowCountIsApproximate) {
+  String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate) {
     if (rowCountIsApproximate) {
-      return '$firstRowIndex–$lastRowIndex لە نزیکەی $rowCount';
+      return '$firstRow–$lastRow لە نزیکەی $rowCount';
     }
-    return '$firstRowIndex–$lastRowIndex لە $rowCount';
+    return '$firstRow–$lastRow لە $rowCount';
   }
   @override
   String get openAppDrawerTooltip => 'کردنەوەی مێنوی ڕێنمایی';

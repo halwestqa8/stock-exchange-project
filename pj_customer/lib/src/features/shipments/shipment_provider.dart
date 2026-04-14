@@ -3,9 +3,31 @@ import 'package:pj_api_client/pj_api_client.dart';
 import 'package:pj_domain/pj_domain.dart';
 import '../../core/api_provider.dart';
 
+final shipmentStatusFilterProvider = StateProvider<ShipmentStatus?>(
+  (ref) => null,
+);
+final shipmentSearchProvider = StateProvider<String>((ref) => '');
+
+String? shipmentStatusQueryValue(ShipmentStatus? status) {
+  return switch (status) {
+    null => null,
+    ShipmentStatus.pending => 'pending',
+    ShipmentStatus.inTransit => 'in_transit',
+    ShipmentStatus.delivered => 'delivered',
+    ShipmentStatus.reported => 'reported',
+  };
+}
+
 final customerShipmentsProvider = FutureProvider<List<Shipment>>((ref) async {
   final client = ref.watch(apiClientProvider);
-  final response = await client.getShipments();
+  final status = ref.watch(shipmentStatusFilterProvider);
+  final search = ref.watch(shipmentSearchProvider);
+
+  final response = await client.getShipments(
+    status: shipmentStatusQueryValue(status),
+    search: search.isEmpty ? null : search,
+  );
+
   final List data = response.data['data'];
   return data.map((json) => Shipment.fromJson(json)).toList();
 });

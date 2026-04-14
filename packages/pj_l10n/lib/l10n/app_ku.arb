@@ -60,6 +60,7 @@
   "create": "دروستکردن",
   "update": "نوێکردنەوە",
   "search": "گەڕان",
+  "searchPlaceholder": "گەڕان بۆ بارەکان...",
   "filter": "فلتەر",
   "refresh": "نوێکردنەوە",
   "submit": "ناردن",

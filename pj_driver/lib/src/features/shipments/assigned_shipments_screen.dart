@@ -11,9 +11,13 @@ import 'widgets/status_badge.dart';
 
 final driverShipmentsProvider = FutureProvider<List<Shipment>>((ref) async {
   final client = ref.watch(apiClientProvider);
+  // Drivers only want to see work-in-progress on this screen
   final response = await client.getShipments();
   final List data = response.data['data'];
-  return data.map((json) => Shipment.fromJson(json)).toList();
+  return data
+      .map((json) => Shipment.fromJson(json))
+      .where((s) => s.status != ShipmentStatus.delivered)
+      .toList();
 });
 
 class AssignedShipmentsScreen extends ConsumerWidget {

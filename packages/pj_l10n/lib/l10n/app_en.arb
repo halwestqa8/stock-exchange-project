@@ -102,6 +102,7 @@
   "create": "Create",
   "update": "Update",
   "search": "Search",
+  "searchPlaceholder": "Search shipments...",
   "filter": "Filter",
   "refresh": "Refresh",
   "submit": "Submit",

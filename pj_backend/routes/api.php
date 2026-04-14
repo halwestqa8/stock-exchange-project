@@ -51,15 +51,21 @@ Route::prefix('v1')->group(function () {
 
             Route::get('/admin/categories', [AdminController::class, 'categories']);
             Route::post('/admin/categories', [AdminController::class, 'storeCategory']);
+            Route::patch('/admin/categories/{category}', [AdminController::class, 'updateCategory']);
+            Route::delete('/admin/categories/{category}', [AdminController::class, 'destroyCategory']);
 
             Route::get('/admin/vehicles', [AdminController::class, 'vehicleTypes']);
             Route::post('/admin/vehicles', [AdminController::class, 'storeVehicleType']);
+            Route::patch('/admin/vehicles/{vehicleType}', [AdminController::class, 'updateVehicleType']);
+            Route::delete('/admin/vehicles/{vehicleType}', [AdminController::class, 'destroyVehicleType']);
 
             Route::get('/admin/pricing', [AdminController::class, 'pricing']);
             Route::patch('/admin/pricing', [AdminController::class, 'updatePricing']);
 
             Route::get('/admin/faq', [AdminController::class, 'faqs']);
             Route::post('/admin/faq', [AdminController::class, 'storeFaq']);
+            Route::patch('/admin/faq/{faq}', [AdminController::class, 'updateFaq']);
+            Route::delete('/admin/faq/{faq}', [AdminController::class, 'destroyFaq']);
         });
     });
 });

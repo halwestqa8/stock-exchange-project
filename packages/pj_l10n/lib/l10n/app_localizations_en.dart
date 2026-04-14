@@ -269,6 +269,9 @@ class L10nEn extends L10n {
   String get search => 'Search';
 
   @override
+  String get searchPlaceholder => 'Search shipments...';
+
+  @override
   String get filter => 'Filter';
 
   @override

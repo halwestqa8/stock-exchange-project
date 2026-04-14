@@ -2,102 +2,89 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Shipment;
-use App\Models\Category;
-use App\Models\VehicleType;
-use App\Models\PricingConfig;
+use App\Http\Requests\StoreShipmentRequest;
 use App\Models\Notification;
+use App\Models\Shipment;
+use App\Models\User;
+use App\Services\PricingService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class ShipmentController extends Controller
 {
+    protected $pricingService;
+
+    public function __construct(PricingService $pricingService)
+    {
+        $this->pricingService = $pricingService;
+    }
     public function index(Request $request)
     {
         $user = $request->user();
         $query = Shipment::with(['category', 'vehicleType']);
 
+        // Role-based scoping
         if ($user->role === 'customer') {
             $query->where('customer_id', $user->id);
         } elseif ($user->role === 'driver') {
             $query->where('driver_id', $user->id);
         }
 
-        if ($request->filled('status')) {
+        // Server-side filtering by status
+        if ($request->filled('status') && $request->status !== 'All') {
             $query->where('status', $request->status);
+        }
+
+        // Server-side search
+        if ($request->filled('search')) {
+            $search = trim((string) $request->search);
+            $like = '%' . strtolower($search) . '%';
+
+            $query->where(function ($q) use ($like) {
+                $q->whereRaw('LOWER(CAST(id AS TEXT)) LIKE ?', [$like])
+                  ->orWhereRaw('LOWER(origin) LIKE ?', [$like])
+                  ->orWhereRaw('LOWER(destination) LIKE ?', [$like]);
+            });
         }
 
         return response()->json($query->latest()->paginate(15));
     }
 
-    public function store(Request $request)
+    public function store(StoreShipmentRequest $request)
     {
-        $request->validate([
-            'origin' => 'required|string',
-            'destination' => 'required|string',
-            'transit_countries' => 'nullable|array',
-            'weight_kg' => 'nullable|numeric|min:0.1',
-            'size' => 'nullable|string',
-            'category_id' => 'required|exists:categories,id',
-            'vehicle_type_id' => 'required|exists:vehicle_types,id',
-        ]);
+        return DB::transaction(function () use ($request) {
+            $pricingResult = $this->pricingService->calculate(
+                $request->category_id,
+                $request->vehicle_type_id,
+                $request->weight_kg,
+                $request->size
+            );
 
-        $category = Category::findOrFail($request->category_id);
-        $vehicleType = VehicleType::findOrFail($request->vehicle_type_id);
-        $pricing = PricingConfig::first() ?? new PricingConfig(['base_price' => 10, 'weight_rate' => 2]);
+            $shipment = Shipment::create([
+                'customer_id' => $request->user()->id,
+                'origin' => $request->origin,
+                'destination' => $request->destination,
+                'transit_countries' => $request->transit_countries,
+                'weight_kg' => $request->weight_kg,
+                'size' => $request->size,
+                'category_id' => $request->category_id,
+                'vehicle_type_id' => $request->vehicle_type_id,
+                'price_breakdown' => $pricingResult['breakdown'],
+                'total_price' => $pricingResult['total_price'],
+                'estimated_delivery_days' => $pricingResult['estimated_delivery_days'],
+                'status' => 'pending',
+            ]);
 
-        // Pricing Formula: Total Price = (Base Price + (Weight kg × Weight Rate) + Category Surcharge) × Vehicle Multiplier
-        $basePrice = $pricing->base_price;
-        $weightCost = 0;
-        
-        if ($request->has('weight_kg') && $request->weight_kg > 0) {
-            $weightCost = $request->weight_kg * $pricing->weight_rate;
-        } elseif ($request->has('size') && $request->filled('size')) {
-            $dims = explode('x', strtolower($request->size));
-            if (count($dims) == 3) {
-                $volumeCm3 = floatval($dims[0]) * floatval($dims[1]) * floatval($dims[2]);
-                $volumetricWeightKg = $volumeCm3 / 5000;
-                $weightCost = max($volumetricWeightKg * $pricing->weight_rate, 10);
-            } else {
-                $weightCost = 10;
-            }
-        }
+            Notification::create([
+                'user_id' => $shipment->customer_id,
+                'message_en' => 'Your shipment has been created and is currently pending.',
+                'message_ku' => 'بارەکەت دروستکرا و لە ئێستادا چاوەڕوانە.',
+                'type' => 'status_update',
+                'is_read' => false,
+            ]);
 
-        $categorySurcharge = $category->surcharge;
-        $totalPrice = ($basePrice + $weightCost + $categorySurcharge) * $vehicleType->multiplier;
-
-        // Estimated Delivery Days = Base Days (e.g., 3) + Vehicle Type Offset
-        $estimatedDays = 3 + $vehicleType->delivery_days_offset;
-
-        $shipment = Shipment::create([
-            'customer_id' => $request->user()->id,
-            'origin' => $request->origin,
-            'destination' => $request->destination,
-            'transit_countries' => $request->transit_countries,
-            'weight_kg' => $request->weight_kg,
-            'size' => $request->size,
-            'category_id' => $request->category_id,
-            'vehicle_type_id' => $request->vehicle_type_id,
-            'price_breakdown' => [
-                'base_price' => $basePrice,
-                'weight_cost' => $weightCost,
-                'category_surcharge' => $categorySurcharge,
-                'vehicle_multiplier' => $vehicleType->multiplier,
-            ],
-            'total_price' => $totalPrice,
-            'estimated_delivery_days' => $estimatedDays,
-            'status' => 'pending',
-        ]);
-
-        Notification::create([
-            'user_id' => $shipment->customer_id,
-            'message_en' => 'Your shipment has been created and is currently pending.',
-            'message_ku' => 'بارەکەت دروستکرا و لە ئێستادا چاوەڕوانە.',
-            'type' => 'status_update',
-            'is_read' => false,
-        ]);
-
-        return response()->json($shipment->load(['category', 'vehicleType']), 201);
+            return response()->json($shipment->load(['category', 'vehicleType']), 201);
+        });
     }
 
     public function show($id)
@@ -158,10 +145,10 @@ class ShipmentController extends Controller
 
         return response()->json($shipment->load('driver'));
     }
- 
+
     public function drivers()
     {
-        $drivers = \App\Models\User::where('role', 'driver')
+        $drivers = User::where('role', 'driver')
             ->where('is_active', true)
             ->get(['id', 'name', 'email']);
 
@@ -177,32 +164,16 @@ class ShipmentController extends Controller
             'vehicle_type_id' => 'required|exists:vehicle_types,id',
         ]);
 
-        $category = Category::find($request->category_id);
-        $vehicleType = VehicleType::find($request->vehicle_type_id);
-        $pricing = PricingConfig::first() ?? new PricingConfig(['base_price' => 10, 'weight_rate' => 2]);
-
-        $basePrice = $pricing->base_price;
-        $weightCost = 0;
-        
-        if ($request->has('weight_kg') && $request->weight_kg > 0) {
-            $weightCost = $request->weight_kg * $pricing->weight_rate;
-        } elseif ($request->has('size') && $request->filled('size')) {
-            $dims = explode('x', strtolower($request->size));
-            if (count($dims) == 3) {
-                $volumeCm3 = floatval($dims[0]) * floatval($dims[1]) * floatval($dims[2]);
-                $volumetricWeightKg = $volumeCm3 / 5000;
-                $weightCost = max($volumetricWeightKg * $pricing->weight_rate, 10);
-            } else {
-                $weightCost = 10;
-            }
-        }
-
-        $categorySurcharge = $category->surcharge;
-        $totalPrice = ($basePrice + $weightCost + $categorySurcharge) * $vehicleType->multiplier;
+        $pricingResult = $this->pricingService->calculate(
+            $request->category_id,
+            $request->vehicle_type_id,
+            $request->weight_kg,
+            $request->size
+        );
 
         return response()->json([
-            'total_price' => $totalPrice,
-            'estimated_delivery_days' => 3 + $vehicleType->delivery_days_offset,
+            'total_price' => $pricingResult['total_price'],
+            'estimated_delivery_days' => $pricingResult['estimated_delivery_days'],
         ]);
     }
 }

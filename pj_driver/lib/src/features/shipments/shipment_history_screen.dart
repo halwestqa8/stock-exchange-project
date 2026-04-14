@@ -7,18 +7,38 @@ import '../../core/theme.dart';
 import 'package:pj_l10n/pj_l10n.dart';
 import 'widgets/status_badge.dart';
 
+final historySearchProvider = StateProvider<String>((ref) => '');
+
 final shipmentHistoryProvider = FutureProvider<List<Shipment>>((ref) async {
   final client = ref.watch(apiClientProvider);
-  final response = await client.getShipments(status: 'delivered');
+  final search = ref.watch(historySearchProvider);
+  
+  final response = await client.getShipments(
+    status: 'delivered', // History is typically delivered
+    search: search.isEmpty ? null : search,
+  );
   final List data = response.data['data'];
   return data.map((json) => Shipment.fromJson(json)).toList();
 });
 
-class ShipmentHistoryScreen extends ConsumerWidget {
+class ShipmentHistoryScreen extends ConsumerStatefulWidget {
   const ShipmentHistoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ShipmentHistoryScreen> createState() => _ShipmentHistoryScreenState();
+}
+
+class _ShipmentHistoryScreenState extends ConsumerState<ShipmentHistoryScreen> {
+  final TextEditingController _searchCtrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     final historyAsync = ref.watch(shipmentHistoryProvider);
     final l10n = L10n.of(context)!;
@@ -39,6 +59,35 @@ class ShipmentHistoryScreen extends ConsumerWidget {
                   const SizedBox(height: 2),
                   Text(l10n.allCaughtUp, style: tt.bodySmall),
                 ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            // ── Search Bar ──
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              child: Container(
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppTheme.card,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppTheme.border),
+                ),
+                child: TextField(
+                  controller: _searchCtrl,
+                  onChanged: (val) =>
+                      ref.read(historySearchProvider.notifier).state = val,
+                  decoration: InputDecoration(
+                    hintText: l10n.searchPlaceholder,
+                    hintStyle:
+                        const TextStyle(fontSize: 14, color: AppTheme.muted),
+                    prefixIcon: const Icon(Icons.search_rounded,
+                        size: 20, color: AppTheme.muted),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 16),

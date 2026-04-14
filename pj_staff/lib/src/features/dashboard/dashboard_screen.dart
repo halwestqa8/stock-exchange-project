@@ -10,8 +10,28 @@ import '../../core/api_provider.dart';
 import '../../core/theme.dart';
 import '../shell/staff_shell.dart';
 
+final staffStatusFilterProvider = StateProvider<ShipmentStatus?>((ref) => null);
+final staffSearchProvider = StateProvider<String>((ref) => '');
+
+String? shipmentStatusQueryValue(ShipmentStatus? status) {
+  return switch (status) {
+    null => null,
+    ShipmentStatus.pending => 'pending',
+    ShipmentStatus.inTransit => 'in_transit',
+    ShipmentStatus.delivered => 'delivered',
+    ShipmentStatus.reported => 'reported',
+  };
+}
+
 final staffShipmentsProvider = FutureProvider<List<Shipment>>((ref) async {
-  final response = await ref.read(apiClientProvider).getShipments();
+  final client = ref.watch(apiClientProvider);
+  final status = ref.watch(staffStatusFilterProvider);
+  final search = ref.watch(staffSearchProvider);
+
+  final response = await client.getShipments(
+    status: shipmentStatusQueryValue(status),
+    search: search.isEmpty ? null : search,
+  );
   final List data = response.data['data'];
   return data.map((json) => Shipment.fromJson(json)).toList();
 });
@@ -21,15 +41,38 @@ final allDriversProvider = FutureProvider<List<dynamic>>((ref) async {
   return response.data as List<dynamic>;
 });
 
-class StaffDashboardScreen extends ConsumerWidget {
+class StaffDashboardScreen extends ConsumerStatefulWidget {
   const StaffDashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StaffDashboardScreen> createState() =>
+      _StaffDashboardScreenState();
+}
+
+class _StaffDashboardScreenState extends ConsumerState<StaffDashboardScreen> {
+  final TextEditingController _searchCtrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     final l10n = L10n.of(context)!;
     final locale = ref.watch(localeProvider);
     final shipmentsAsync = ref.watch(staffShipmentsProvider);
+    final selectedFilter = ref.watch(staffStatusFilterProvider);
+
+    final filters = <({ShipmentStatus? value, String label})>[
+      (value: null, label: l10n.all),
+      (value: ShipmentStatus.pending, label: l10n.pending),
+      (value: ShipmentStatus.inTransit, label: l10n.inTransit),
+      (value: ShipmentStatus.delivered, label: l10n.delivered),
+      (value: ShipmentStatus.reported, label: l10n.reported),
+    ];
     final isCompact = MediaQuery.sizeOf(context).width < 960;
     final pagePadding = EdgeInsets.all(isCompact ? 16 : 28);
 
@@ -188,6 +231,67 @@ class StaffDashboardScreen extends ConsumerWidget {
               error: (_, _) => const SizedBox(),
             ),
             const SizedBox(height: 20),
+            // ── Filters & Search ──
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 38,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: filters.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(width: 8),
+                      itemBuilder: (context, i) {
+                        final filter = filters[i];
+                        return ShipmentFilterChip(
+                          label: filter.label,
+                          isActive: selectedFilter == filter.value,
+                          activeColor: AppTheme.indigo,
+                          onTap: () =>
+                              ref
+                                      .read(staffStatusFilterProvider.notifier)
+                                      .state =
+                                  filter.value,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Container(
+                  width: 280,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppTheme.card,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppTheme.border),
+                  ),
+                  child: TextField(
+                    controller: _searchCtrl,
+                    onChanged: (val) =>
+                        ref.read(staffSearchProvider.notifier).state = val,
+                    decoration: InputDecoration(
+                      hintText: l10n.searchPlaceholder,
+                      hintStyle: const TextStyle(
+                        fontSize: 13,
+                        color: AppTheme.muted,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search_rounded,
+                        size: 18,
+                        color: AppTheme.muted,
+                      ),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 9),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             Expanded(
               child: Container(
                 decoration: BoxDecoration(

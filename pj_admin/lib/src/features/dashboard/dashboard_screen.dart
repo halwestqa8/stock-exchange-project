@@ -21,6 +21,13 @@ class DashboardScreen extends ConsumerStatefulWidget {
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   bool _hasShownKeyChangeDialog = false;
+  final TextEditingController _searchCtrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +37,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final locale = ref.watch(localeProvider);
     final lastKeyChange = ref.watch(lastKeyChangeProvider);
     final shipmentsAsync = ref.watch(shipmentListProvider);
+    final selectedFilter = ref.watch(shipmentStatusFilterProvider);
     final isCompact = MediaQuery.sizeOf(context).width < 960;
+
+    final filters = <({ShipmentStatus? value, String label})>[
+      (value: null, label: l10n.all),
+      (value: ShipmentStatus.pending, label: l10n.pending),
+      (value: ShipmentStatus.inTransit, label: l10n.inTransit),
+      (value: ShipmentStatus.delivered, label: l10n.delivered),
+      (value: ShipmentStatus.reported, label: l10n.reported),
+    ];
 
     if (user != null &&
         DateTime.now().difference(lastKeyChange) > const Duration(days: 90) &&
@@ -236,6 +252,67 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               error: (_, _) => const SizedBox(height: 88),
             ),
             const SizedBox(height: 22),
+            // ── Filters & Search ──
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 38,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: filters.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(width: 8),
+                      itemBuilder: (context, i) {
+                        final filter = filters[i];
+                        return ShipmentFilterChip(
+                          label: filter.label,
+                          isActive: selectedFilter == filter.value,
+                          activeColor: AppTheme.rose,
+                          onTap: () =>
+                              ref
+                                  .read(shipmentStatusFilterProvider.notifier)
+                                  .state = filter
+                                  .value,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Container(
+                  width: 280,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppTheme.card,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppTheme.border),
+                  ),
+                  child: TextField(
+                    controller: _searchCtrl,
+                    onChanged: (val) =>
+                        ref.read(shipmentSearchProvider.notifier).state = val,
+                    decoration: InputDecoration(
+                      hintText: l10n.searchPlaceholder,
+                      hintStyle: const TextStyle(
+                        fontSize: 13,
+                        color: AppTheme.muted,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search_rounded,
+                        size: 18,
+                        color: AppTheme.muted,
+                      ),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 9),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             Expanded(
               child: Container(
                 decoration: BoxDecoration(

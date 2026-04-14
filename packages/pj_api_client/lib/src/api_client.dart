@@ -64,10 +64,14 @@ class ApiClient {
   Future<Response> me() => _dio.get('/api/v1/auth/me');
 
   // Shipments
-  Future<Response> getShipments({String? status, int page = 1}) {
+  Future<Response> getShipments({
+    String? status,
+    String? search,
+    int page = 1,
+  }) {
     return _dio.get(
       '/api/v1/shipments',
-      queryParameters: {'status': status, 'page': page},
+      queryParameters: {'status': status, 'search': search, 'page': page},
     );
   }
 
@@ -158,9 +162,31 @@ class ApiClient {
   Future<Response> toggleUserStatus(int userId) =>
       _dio.patch('/api/v1/admin/users/$userId/toggle');
   Future<Response> getAdminCategories() => _dio.get('/api/v1/admin/categories');
+  Future<Response> createAdminCategory(Map<String, dynamic> data) =>
+      _dio.post('/api/v1/admin/categories', data: data);
+  Future<Response> updateAdminCategory(
+    int categoryId,
+    Map<String, dynamic> data,
+  ) => _dio.patch('/api/v1/admin/categories/$categoryId', data: data);
+  Future<Response> deleteAdminCategory(int categoryId) =>
+      _dio.delete('/api/v1/admin/categories/$categoryId');
   Future<Response> getAdminVehicles() => _dio.get('/api/v1/admin/vehicles');
+  Future<Response> createAdminVehicle(Map<String, dynamic> data) =>
+      _dio.post('/api/v1/admin/vehicles', data: data);
+  Future<Response> updateAdminVehicle(
+    int vehicleTypeId,
+    Map<String, dynamic> data,
+  ) => _dio.patch('/api/v1/admin/vehicles/$vehicleTypeId', data: data);
+  Future<Response> deleteAdminVehicle(int vehicleTypeId) =>
+      _dio.delete('/api/v1/admin/vehicles/$vehicleTypeId');
   Future<Response> getAdminPricing() => _dio.get('/api/v1/admin/pricing');
   Future<Response> updateAdminPricing(Map<String, dynamic> data) =>
       _dio.patch('/api/v1/admin/pricing', data: data);
-  Future<Response> getAdminFaqs() => _dio.get('/api/v1/faqs');
+  Future<Response> getAdminFaqs() => _dio.get('/api/v1/admin/faq');
+  Future<Response> createAdminFaq(Map<String, dynamic> data) =>
+      _dio.post('/api/v1/admin/faq', data: data);
+  Future<Response> updateAdminFaq(int faqId, Map<String, dynamic> data) =>
+      _dio.patch('/api/v1/admin/faq/$faqId', data: data);
+  Future<Response> deleteAdminFaq(int faqId) =>
+      _dio.delete('/api/v1/admin/faq/$faqId');
 }

@@ -31,11 +31,17 @@ class AuthNotifier extends StateNotifier<User?> {
 
   static const _tokenKey = 'admin_auth_token';
   static const _userKey = 'admin_auth_user';
+  static const _baseUrlKey = 'admin_auth_base_url';
 
   static _StoredSession? _readStoredSession(SharedPreferences prefs) {
     final token = prefs.getString(_tokenKey);
     final userJson = prefs.getString(_userKey);
+    final storedBaseUrl = prefs.getString(_baseUrlKey);
     if (token == null || userJson == null) {
+      return null;
+    }
+
+    if (storedBaseUrl == null || storedBaseUrl != apiBaseUrl) {
       return null;
     }
 
@@ -64,6 +70,7 @@ class AuthNotifier extends StateNotifier<User?> {
     state = user;
     await _prefs.setString(_tokenKey, token);
     await _prefs.setString(_userKey, jsonEncode(user.toJson()));
+    await _prefs.setString(_baseUrlKey, apiBaseUrl);
   }
 
   void _clearSession() {
@@ -71,6 +78,7 @@ class AuthNotifier extends StateNotifier<User?> {
     state = null;
     _prefs.remove(_tokenKey);
     _prefs.remove(_userKey);
+    _prefs.remove(_baseUrlKey);
   }
 
   Future<void> login(String email, String password, String adminKey) async {

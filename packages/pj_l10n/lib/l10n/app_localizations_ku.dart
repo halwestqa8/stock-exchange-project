@@ -269,6 +269,9 @@ class L10nKu extends L10n {
   String get search => 'گەڕان';
 
   @override
+  String get searchPlaceholder => 'گەڕان بۆ بارەکان...';
+
+  @override
   String get filter => 'فلتەر';
 
   @override

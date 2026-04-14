@@ -607,6 +607,12 @@ abstract class L10n {
   /// **'Search'**
   String get search;
 
+  /// No description provided for @searchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search shipments...'**
+  String get searchPlaceholder;
+
   /// No description provided for @filter.
   ///
   /// In en, this message translates to:

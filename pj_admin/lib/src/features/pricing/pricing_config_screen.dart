@@ -25,17 +25,23 @@ class _PricingConfigScreenState extends ConsumerState<PricingConfigScreen> {
   final _formKey = GlobalKey<FormState>();
   final _basePriceCtrl = TextEditingController();
   final _weightRateCtrl = TextEditingController();
+  final _sizeDivisorCtrl = TextEditingController();
+  final _sizeMinChargeCtrl = TextEditingController();
 
   bool _isSaving = false;
   bool _hasInitializedForm = false;
   double? _initialBasePrice;
   double? _initialWeightRate;
+  double? _initialSizeDivisor;
+  double? _initialSizeMinCharge;
 
   @override
   void initState() {
     super.initState();
     _basePriceCtrl.addListener(_onFieldChanged);
     _weightRateCtrl.addListener(_onFieldChanged);
+    _sizeDivisorCtrl.addListener(_onFieldChanged);
+    _sizeMinChargeCtrl.addListener(_onFieldChanged);
   }
 
   @override
@@ -44,6 +50,12 @@ class _PricingConfigScreenState extends ConsumerState<PricingConfigScreen> {
       ..removeListener(_onFieldChanged)
       ..dispose();
     _weightRateCtrl
+      ..removeListener(_onFieldChanged)
+      ..dispose();
+    _sizeDivisorCtrl
+      ..removeListener(_onFieldChanged)
+      ..dispose();
+    _sizeMinChargeCtrl
       ..removeListener(_onFieldChanged)
       ..dispose();
     super.dispose();
@@ -58,11 +70,17 @@ class _PricingConfigScreenState extends ConsumerState<PricingConfigScreen> {
   void _applyConfig(Map<String, dynamic> config) {
     final basePrice = _parseStoredNumber(config['base_price']) ?? 0;
     final weightRate = _parseStoredNumber(config['weight_rate']) ?? 0;
+    final sizeDivisor = _parseStoredNumber(config['size_divisor']) ?? 5000;
+    final sizeMinCharge = _parseStoredNumber(config['size_min_charge']) ?? 10;
 
     _initialBasePrice = basePrice;
     _initialWeightRate = weightRate;
+    _initialSizeDivisor = sizeDivisor;
+    _initialSizeMinCharge = sizeMinCharge;
     _basePriceCtrl.text = _formatNumber(basePrice);
     _weightRateCtrl.text = _formatNumber(weightRate);
+    _sizeDivisorCtrl.text = _formatNumber(sizeDivisor);
+    _sizeMinChargeCtrl.text = _formatNumber(sizeMinCharge);
     _hasInitializedForm = true;
   }
 
@@ -93,15 +111,35 @@ class _PricingConfigScreenState extends ConsumerState<PricingConfigScreen> {
     return L10n.of(context)!.localeName == 'ku' ? ku : en;
   }
 
-  String? _validatePriceField(BuildContext context, String? value) {
+  String? _validatePriceField(
+    BuildContext context,
+    String? value, {
+    bool allowZero = true,
+    bool mustBePositive = false,
+  }) {
     final l10n = L10n.of(context)!;
     final trimmed = value?.trim() ?? '';
     if (trimmed.isEmpty) return l10n.required;
-    if (_parseFieldValue(trimmed) == null) {
+    final parsed = _parseFieldValue(trimmed);
+    if (parsed == null) {
       return _screenText(
         context,
         ku: 'تکایە ژمارەیەکی دروست بنووسە',
         en: 'Please enter a valid number',
+      );
+    }
+    if (!allowZero && parsed == 0) {
+      return _screenText(
+        context,
+        ku: 'نابێت بە صفر بێت',
+        en: 'Value cannot be zero',
+      );
+    }
+    if (mustBePositive && parsed <= 0) {
+      return _screenText(
+        context,
+        ku: 'تکایە ژمارەیەک لە صفر گەورەتر بنووسە',
+        en: 'Please enter a number greater than zero',
       );
     }
     return null;
@@ -110,15 +148,31 @@ class _PricingConfigScreenState extends ConsumerState<PricingConfigScreen> {
   bool get _isDirty {
     final currentBasePrice = _parseFieldValue(_basePriceCtrl.text);
     final currentWeightRate = _parseFieldValue(_weightRateCtrl.text);
-    if (currentBasePrice == null || currentWeightRate == null) return false;
+    final currentSizeDivisor = _parseFieldValue(_sizeDivisorCtrl.text);
+    final currentSizeMinCharge = _parseFieldValue(_sizeMinChargeCtrl.text);
+    if (currentBasePrice == null ||
+        currentWeightRate == null ||
+        currentSizeDivisor == null ||
+        currentSizeMinCharge == null) {
+      return false;
+    }
     return currentBasePrice != _initialBasePrice ||
-        currentWeightRate != _initialWeightRate;
+        currentWeightRate != _initialWeightRate ||
+        currentSizeDivisor != _initialSizeDivisor ||
+        currentSizeMinCharge != _initialSizeMinCharge;
   }
 
   Future<void> _resetForm() async {
-    if (_initialBasePrice == null || _initialWeightRate == null) return;
+    if (_initialBasePrice == null ||
+        _initialWeightRate == null ||
+        _initialSizeDivisor == null ||
+        _initialSizeMinCharge == null) {
+      return;
+    }
     _basePriceCtrl.text = _formatNumber(_initialBasePrice!);
     _weightRateCtrl.text = _formatNumber(_initialWeightRate!);
+    _sizeDivisorCtrl.text = _formatNumber(_initialSizeDivisor!);
+    _sizeMinChargeCtrl.text = _formatNumber(_initialSizeMinCharge!);
   }
 
   Future<void> _savePricing() async {
@@ -127,7 +181,14 @@ class _PricingConfigScreenState extends ConsumerState<PricingConfigScreen> {
     final l10n = L10n.of(context)!;
     final basePrice = _parseFieldValue(_basePriceCtrl.text);
     final weightRate = _parseFieldValue(_weightRateCtrl.text);
-    if (basePrice == null || weightRate == null) return;
+    final sizeDivisor = _parseFieldValue(_sizeDivisorCtrl.text);
+    final sizeMinCharge = _parseFieldValue(_sizeMinChargeCtrl.text);
+    if (basePrice == null ||
+        weightRate == null ||
+        sizeDivisor == null ||
+        sizeMinCharge == null) {
+      return;
+    }
 
     setState(() => _isSaving = true);
 
@@ -135,6 +196,8 @@ class _PricingConfigScreenState extends ConsumerState<PricingConfigScreen> {
       final response = await ref.read(apiClientProvider).updateAdminPricing({
         'base_price': basePrice,
         'weight_rate': weightRate,
+        'size_divisor': sizeDivisor,
+        'size_min_charge': sizeMinCharge,
       });
 
       final savedConfig = extractMapBody(response.data);
@@ -161,6 +224,14 @@ class _PricingConfigScreenState extends ConsumerState<PricingConfigScreen> {
     }
   }
 
+  String _moneyValue(TextEditingController controller) {
+    return '\$${controller.text}';
+  }
+
+  String _compactValue(TextEditingController controller) {
+    return controller.text.isEmpty ? '0' : controller.text;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context)!;
@@ -180,7 +251,7 @@ class _PricingConfigScreenState extends ConsumerState<PricingConfigScreen> {
       ],
       child: pricingAsync.when(
         data: (config) {
-          if (!_hasInitializedForm) {
+          if (!_hasInitializedForm || (!_isDirty && !_isSaving)) {
             _applyConfig(config);
           }
 
@@ -188,7 +259,7 @@ class _PricingConfigScreenState extends ConsumerState<PricingConfigScreen> {
             padding: EdgeInsets.all(isCompact ? 16 : 28),
             child: Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 900),
+                constraints: const BoxConstraints(maxWidth: 960),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -199,7 +270,11 @@ class _PricingConfigScreenState extends ConsumerState<PricingConfigScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Update the default pricing formula used for shipments.',
+                        _screenText(
+                          context,
+                          ku: 'نرخی داواکاری بە کێش و بە قەبارە لێرە لە یەک شوێن ڕێکبخە.',
+                          en: 'Manage both weight-based and size-based shipment pricing here.',
+                        ),
                         style: textTheme.bodyMedium?.copyWith(
                           color: AppTheme.muted,
                         ),
@@ -215,8 +290,8 @@ class _PricingConfigScreenState extends ConsumerState<PricingConfigScreen> {
                     Text(
                       _screenText(
                         context,
-                        ku: 'نرخی ئێستا',
-                        en: 'Current pricing',
+                        ku: 'ڕێکخستنی نرخ',
+                        en: 'Pricing settings',
                       ),
                       style: textTheme.labelLarge?.copyWith(
                         color: AppTheme.ink,
@@ -241,8 +316,8 @@ class _PricingConfigScreenState extends ConsumerState<PricingConfigScreen> {
                               label: l10n.basePrice,
                               helperText: _screenText(
                                 context,
-                                ku: 'نرخی سەرەکی بۆ هەر بارێک',
-                                en: 'Starting price for every shipment',
+                                ku: 'نرخی سەرەکی بۆ هەر داواکارییەک',
+                                en: 'Starting price added to every shipment',
                               ),
                               prefixIcon: Icons.attach_money_rounded,
                               suffixText: 'USD',
@@ -252,14 +327,58 @@ class _PricingConfigScreenState extends ConsumerState<PricingConfigScreen> {
                             const SizedBox(height: 18),
                             _PricingField(
                               controller: _weightRateCtrl,
-                              label: l10n.weightRate,
+                              label: _screenText(
+                                context,
+                                ku: 'نرخی داواکاری بە کێش',
+                                en: 'Weight order rate',
+                              ),
                               helperText: _screenText(
                                 context,
-                                ku: 'زیادبوونی نرخ بەپێی کێش',
-                                en: 'Additional charge per kilogram',
+                                ku: 'بۆ داواکارییەکانی هەوا بە پێی کیلۆگرام بەکاردێت',
+                                en: 'Used for shipments ordered by kilogram',
                               ),
                               prefixIcon: Icons.scale_rounded,
                               suffixText: '/kg',
+                              validator: (value) =>
+                                  _validatePriceField(context, value),
+                            ),
+                            const SizedBox(height: 18),
+                            _PricingField(
+                              controller: _sizeDivisorCtrl,
+                              label: _screenText(
+                                context,
+                                ku: 'دابەشکەری قەبارە',
+                                en: 'Size divisor',
+                              ),
+                              helperText: _screenText(
+                                context,
+                                ku: 'قەبارەی L×W×H بە سێجا پاشان بەسەر ئەم ژمارەیە دابەش دەکرێت',
+                                en: 'Converts L×W×H dimensions into volumetric kilograms',
+                              ),
+                              prefixIcon: Icons.straighten_rounded,
+                              suffixText: 'cm³/kg',
+                              validator: (value) => _validatePriceField(
+                                context,
+                                value,
+                                allowZero: false,
+                                mustBePositive: true,
+                              ),
+                            ),
+                            const SizedBox(height: 18),
+                            _PricingField(
+                              controller: _sizeMinChargeCtrl,
+                              label: _screenText(
+                                context,
+                                ku: 'کەمترین نرخی قەبارە',
+                                en: 'Minimum size charge',
+                              ),
+                              helperText: _screenText(
+                                context,
+                                ku: 'کەمترین بڕی زیادکراو بۆ داواکاری بە قەبارە',
+                                en: 'Minimum extra charge for size-based orders',
+                              ),
+                              prefixIcon: Icons.inventory_2_outlined,
+                              suffixText: 'USD',
                               validator: (value) =>
                                   _validatePriceField(context, value),
                             ),
@@ -297,30 +416,95 @@ class _PricingConfigScreenState extends ConsumerState<PricingConfigScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: AppTheme.card,
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: AppTheme.border),
-                      ),
-                      child: Column(
-                        children: [
-                          _SummaryRow(
-                            icon: Icons.payments_rounded,
-                            iconColor: AppTheme.teal,
-                            label: l10n.basePrice,
-                            value: '\$${_basePriceCtrl.text}',
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final stacked = constraints.maxWidth < 760;
+                        final weightCard = _PricingModeCard(
+                          icon: Icons.monitor_weight_outlined,
+                          iconColor: AppTheme.teal,
+                          title: _screenText(
+                            context,
+                            ku: 'داواکاری بە کێش',
+                            en: 'Order by kg',
                           ),
-                          const Divider(height: 28),
-                          _SummaryRow(
-                            icon: Icons.monitor_weight_outlined,
-                            iconColor: AppTheme.blue,
-                            label: l10n.weightRate,
-                            value: '\$${_weightRateCtrl.text} /kg',
+                          description: _screenText(
+                            context,
+                            ku: 'کڕیار کێش بە کیلۆگرام دەنێرێت و نرخ بە پێی کێش هەژمار دەکرێت.',
+                            en: 'Customer enters shipment weight in kilograms.',
                           ),
-                        ],
-                      ),
+                          stats: [
+                            _ModeStat(
+                              label: l10n.basePrice,
+                              value: _moneyValue(_basePriceCtrl),
+                            ),
+                            _ModeStat(
+                              label: l10n.weightRate,
+                              value: '${_moneyValue(_weightRateCtrl)} /kg',
+                            ),
+                          ],
+                          formula: _screenText(
+                            context,
+                            ku: 'کۆی = (${_moneyValue(_basePriceCtrl)} + کێش × ${_compactValue(_weightRateCtrl)}) + خەرێک، پاشان لە لێکدەری ئامێر دەدرێت.',
+                            en: 'Total = (${_moneyValue(_basePriceCtrl)} + kg × ${_compactValue(_weightRateCtrl)}) + surcharge, then multiplied by vehicle.',
+                          ),
+                        );
+                        final sizeCard = _PricingModeCard(
+                          icon: Icons.straighten_rounded,
+                          iconColor: AppTheme.blue,
+                          title: _screenText(
+                            context,
+                            ku: 'داواکاری بە قەبارە',
+                            en: 'Order by size',
+                          ),
+                          description: _screenText(
+                            context,
+                            ku: 'قەبارەی L×W×H بۆ کێشی ئەندازیاری دەگۆڕدرێت، پاشان هەمان نرخی کێش بەکاردێت.',
+                            en: 'Dimensions are converted to volumetric kilograms before applying the rate.',
+                          ),
+                          stats: [
+                            _ModeStat(
+                              label: _screenText(
+                                context,
+                                ku: 'دابەشکەر',
+                                en: 'Divisor',
+                              ),
+                              value: _compactValue(_sizeDivisorCtrl),
+                            ),
+                            _ModeStat(
+                              label: _screenText(
+                                context,
+                                ku: 'کەمترین نرخ',
+                                en: 'Minimum charge',
+                              ),
+                              value: _moneyValue(_sizeMinChargeCtrl),
+                            ),
+                          ],
+                          formula: _screenText(
+                            context,
+                            ku: 'نرخی قەبارە = max(((L×W×H) ÷ ${_compactValue(_sizeDivisorCtrl)}) × ${_compactValue(_weightRateCtrl)}, ${_moneyValue(_sizeMinChargeCtrl)}).',
+                            en: 'Size charge = max(((L×W×H) ÷ ${_compactValue(_sizeDivisorCtrl)}) × ${_compactValue(_weightRateCtrl)}, ${_moneyValue(_sizeMinChargeCtrl)}).',
+                          ),
+                        );
+
+                        if (stacked) {
+                          return Column(
+                            children: [
+                              weightCard,
+                              const SizedBox(height: 16),
+                              sizeCard,
+                            ],
+                          );
+                        }
+
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(child: weightCard),
+                            const SizedBox(width: 16),
+                            Expanded(child: sizeCard),
+                          ],
+                        );
+                      },
                     ),
                     const SizedBox(height: 20),
                     Container(
@@ -340,7 +524,11 @@ class _PricingConfigScreenState extends ConsumerState<PricingConfigScreen> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              l10n.pricingFormula,
+                              _screenText(
+                                context,
+                                ku: 'هەوا بە کێش هەژمار دەکرێت. زەوی و دەریا دەتوانن بە قەبارە هەژمار بکرێن لە ڕێگەی دابەشکردنی L×W×H بە ${_compactValue(_sizeDivisorCtrl)}.',
+                                en: 'Air shipments use kg pricing. Ground and sea shipments can use size pricing through the L×W×H ÷ ${_compactValue(_sizeDivisorCtrl)} volumetric rule.',
+                              ),
                               style: const TextStyle(
                                 fontSize: 13,
                                 color: Color(0xFF1E40AF),
@@ -412,43 +600,123 @@ class _PricingField extends StatelessWidget {
   }
 }
 
-class _SummaryRow extends StatelessWidget {
-  const _SummaryRow({
+class _ModeStat {
+  const _ModeStat({required this.label, required this.value});
+
+  final String label;
+  final String value;
+}
+
+class _PricingModeCard extends StatelessWidget {
+  const _PricingModeCard({
     required this.icon,
     required this.iconColor,
-    required this.label,
-    required this.value,
+    required this.title,
+    required this.description,
+    required this.stats,
+    required this.formula,
   });
 
   final IconData icon;
   final Color iconColor;
-  final String label;
-  final String value;
+  final String title;
+  final String description;
+  final List<_ModeStat> stats;
+  final String formula;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, color: iconColor, size: 22),
-        const SizedBox(width: 12),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            color: AppTheme.muted,
-            fontWeight: FontWeight.w500,
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppTheme.card,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppTheme.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: iconColor.withAlpha(24),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: iconColor),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.ink,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-        const Spacer(),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: AppTheme.ink,
+          const SizedBox(height: 10),
+          Text(
+            description,
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppTheme.muted,
+              height: 1.5,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 14),
+          ...stats.map(
+            (stat) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(
+                children: [
+                  Text(
+                    stat.label,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.muted,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    stat.value,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: AppTheme.ink,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppTheme.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppTheme.border),
+            ),
+            child: Text(
+              formula,
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppTheme.ink,
+                height: 1.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

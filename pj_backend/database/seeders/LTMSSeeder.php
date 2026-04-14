@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\Category;
 use App\Models\Faq;
 use App\Models\PricingConfig;
+use App\Models\Report;
+use App\Models\Shipment;
 use App\Models\User;
 use App\Models\VehicleType;
 use Illuminate\Database\Seeder;
@@ -44,11 +46,24 @@ class LTMSSeeder extends Seeder
             'is_active' => true,
         ]);
 
+        $customer = User::updateOrCreate([
+            'email' => env('SEED_CUSTOMER_EMAIL', 'customer@ltms.app'),
+        ], [
+            'name' => 'Sample Customer',
+            'password' => Hash::make(env('SEED_CUSTOMER_PASSWORD', 'password')),
+            'role' => 'customer',
+            'is_active' => true,
+        ]);
+
+        $driver = User::where('email', env('SEED_DRIVER_EMAIL', 'driver@ltms.app'))->first();
+
         PricingConfig::updateOrCreate([
             'id' => 1,
         ], [
             'base_price' => 15.00,
             'weight_rate' => 2.50,
+            'size_divisor' => 5000.00,
+            'size_min_charge' => 10.00,
         ]);
 
         Category::updateOrCreate([
@@ -101,5 +116,105 @@ class LTMSSeeder extends Seeder
             'answer_ku' => 'La appaka My Shipments bikawa bo binini doxi esta.',
             'sort_order' => 1,
         ]);
+
+        $general = Category::where('name_en', 'General')->first();
+        $fragile = Category::where('name_en', 'Fragile')->first();
+        $car = VehicleType::where('name_en', 'Car')->first();
+        $truck = VehicleType::where('name_en', 'Truck')->first();
+
+        if ($customer && $driver && $general && $fragile && $car && $truck) {
+            $shipmentOne = Shipment::updateOrCreate([
+                'customer_id' => $customer->id,
+                'origin' => 'Erbil Warehouse',
+                'destination' => 'Duhok Market',
+            ], [
+                'driver_id' => $driver->id,
+                'transit_countries' => [],
+                'weight_kg' => 4.5,
+                'size' => 'medium',
+                'category_id' => $general->id,
+                'vehicle_type_id' => $car->id,
+                'price_breakdown' => [
+                    'base_price' => 15,
+                    'weight_rate' => 11.25,
+                    'category_surcharge' => 0,
+                    'vehicle_multiplier' => 1.2,
+                ],
+                'total_price' => 31.50,
+                'estimated_delivery_days' => 1,
+                'status' => 'reported',
+            ]);
+
+            $shipmentTwo = Shipment::updateOrCreate([
+                'customer_id' => $customer->id,
+                'origin' => 'Sulaimani Hub',
+                'destination' => 'Kirkuk Mall',
+            ], [
+                'driver_id' => $driver->id,
+                'transit_countries' => [],
+                'weight_kg' => 12.0,
+                'size' => 'large',
+                'category_id' => $fragile->id,
+                'vehicle_type_id' => $truck->id,
+                'price_breakdown' => [
+                    'base_price' => 15,
+                    'weight_rate' => 30,
+                    'category_surcharge' => 10,
+                    'vehicle_multiplier' => 1.5,
+                ],
+                'total_price' => 82.50,
+                'estimated_delivery_days' => 3,
+                'status' => 'reported',
+            ]);
+
+            $shipmentThree = Shipment::updateOrCreate([
+                'customer_id' => $customer->id,
+                'origin' => 'Halabja Center',
+                'destination' => 'Erbil Airport Road',
+            ], [
+                'driver_id' => $driver->id,
+                'transit_countries' => [],
+                'weight_kg' => 2.3,
+                'size' => 'small',
+                'category_id' => $general->id,
+                'vehicle_type_id' => $car->id,
+                'price_breakdown' => [
+                    'base_price' => 15,
+                    'weight_rate' => 5.75,
+                    'category_surcharge' => 0,
+                    'vehicle_multiplier' => 1.2,
+                ],
+                'total_price' => 24.90,
+                'estimated_delivery_days' => 1,
+                'status' => 'reported',
+            ]);
+
+            Report::updateOrCreate([
+                'shipment_id' => $shipmentOne->id,
+            ], [
+                'customer_comment' => 'Package arrived late and the outer box was dented.',
+                'staff_response' => null,
+                'status' => 'open',
+                'resolved_at' => null,
+            ]);
+
+            Report::updateOrCreate([
+                'shipment_id' => $shipmentTwo->id,
+            ], [
+                'customer_comment' => 'Fragile items were handled roughly during delivery.',
+                'staff_response' => 'We reviewed the route and issued a compensation voucher.',
+                'status' => 'resolved',
+                'resolved_at' => now()->subDay(),
+            ]);
+
+            Report::updateOrCreate([
+                'shipment_id' => $shipmentThree->id,
+            ], [
+                'customer_comment' => 'Driver marked the shipment delivered before arrival.',
+                'staff_response' => null,
+                'status' => 'open',
+                'resolved_at' => null,
+            ]);
+        }
     }
 }

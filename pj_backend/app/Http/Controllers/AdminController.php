@@ -59,12 +59,39 @@ class AdminController extends Controller
 
     public function storeCategory(Request $request)
     {
-        $request->validate([
+        $attributes = $request->validate([
             'name_en' => 'required|string',
             'name_ku' => 'required|string',
             'surcharge' => 'required|numeric',
         ]);
-        return response()->json(Category::create($request->all()), 201);
+
+        return response()->json(Category::create($attributes), 201);
+    }
+
+    public function updateCategory(Request $request, Category $category)
+    {
+        $attributes = $request->validate([
+            'name_en' => 'required|string',
+            'name_ku' => 'required|string',
+            'surcharge' => 'required|numeric',
+        ]);
+
+        $category->update($attributes);
+
+        return response()->json($category);
+    }
+
+    public function destroyCategory(Category $category)
+    {
+        if ($category->shipments()->exists()) {
+            return response()->json([
+                'message' => 'This category is already used by shipments and cannot be deleted.',
+            ], 422);
+        }
+
+        $category->delete();
+
+        return response()->noContent();
     }
 
     // Vehicle Types
@@ -75,29 +102,66 @@ class AdminController extends Controller
 
     public function storeVehicleType(Request $request)
     {
-        $request->validate([
+        $attributes = $request->validate([
             'name_en' => 'required|string',
             'name_ku' => 'required|string',
             'multiplier' => 'required|numeric',
             'delivery_days_offset' => 'required|integer',
         ]);
-        return response()->json(VehicleType::create($request->all()), 201);
+
+        return response()->json(VehicleType::create($attributes), 201);
+    }
+
+    public function updateVehicleType(Request $request, VehicleType $vehicleType)
+    {
+        $attributes = $request->validate([
+            'name_en' => 'required|string',
+            'name_ku' => 'required|string',
+            'multiplier' => 'required|numeric',
+            'delivery_days_offset' => 'required|integer',
+        ]);
+
+        $vehicleType->update($attributes);
+
+        return response()->json($vehicleType);
+    }
+
+    public function destroyVehicleType(VehicleType $vehicleType)
+    {
+        if ($vehicleType->shipments()->exists()) {
+            return response()->json([
+                'message' => 'This vehicle type is already used by shipments and cannot be deleted.',
+            ], 422);
+        }
+
+        $vehicleType->delete();
+
+        return response()->noContent();
     }
 
     // Pricing Config
     public function pricing()
     {
-        return response()->json(PricingConfig::first());
+        return response()->json(PricingConfig::first() ?? new PricingConfig([
+            'base_price' => 10,
+            'weight_rate' => 2,
+            'size_divisor' => 5000,
+            'size_min_charge' => 10,
+        ]));
     }
 
     public function updatePricing(Request $request)
     {
-        $request->validate([
-            'base_price' => 'required|numeric',
-            'weight_rate' => 'required|numeric',
+        $attributes = $request->validate([
+            'base_price' => 'required|numeric|min:0',
+            'weight_rate' => 'required|numeric|min:0',
+            'size_divisor' => 'required|numeric|gt:0',
+            'size_min_charge' => 'required|numeric|min:0',
         ]);
+
         $pricing = PricingConfig::first() ?? new PricingConfig();
-        $pricing->fill($request->all())->save();
+        $pricing->fill($attributes)->save();
+
         return response()->json($pricing);
     }
 
@@ -109,13 +173,39 @@ class AdminController extends Controller
 
     public function storeFaq(Request $request)
     {
-        $request->validate([
+        $attributes = $request->validate([
             'question_en' => 'required|string',
             'question_ku' => 'required|string',
             'answer_en' => 'required|string',
             'answer_ku' => 'required|string',
-            'sort_order' => 'integer',
+            'sort_order' => 'nullable|integer|min:0',
         ]);
-        return response()->json(Faq::create($request->all()), 201);
+
+        $attributes['sort_order'] ??= ((int) Faq::max('sort_order')) + 1;
+
+        return response()->json(Faq::create($attributes), 201);
+    }
+
+    public function updateFaq(Request $request, Faq $faq)
+    {
+        $attributes = $request->validate([
+            'question_en' => 'required|string',
+            'question_ku' => 'required|string',
+            'answer_en' => 'required|string',
+            'answer_ku' => 'required|string',
+            'sort_order' => 'nullable|integer|min:0',
+        ]);
+
+        $attributes['sort_order'] ??= $faq->sort_order;
+        $faq->update($attributes);
+
+        return response()->json($faq);
+    }
+
+    public function destroyFaq(Faq $faq)
+    {
+        $faq->delete();
+
+        return response()->noContent();
     }
 }
